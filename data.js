@@ -64,6 +64,13 @@ export const data = {
   ],
   projects: [
     {
+      title: "BillGenie",
+      description: "A containerized, high-performance web application designed for community organizations and trusts to streamline donor registry management, financial ledger entries (with fast Single & Batch modes), and automated receipt printing. Features a performance-optimized local state caching engine, annual ledgers with advanced filtering, and a print engine for compiling bulk A4 PDF documents.",
+      tags: ["React", "FastAPI", "PocketBase", "Docker", "Pydantic", "Excel Import"],
+      link: "https://github.com/Isu-Ismail/BillGenie/",
+      status: "Completed"
+    },
+    {
       title: "Sri Energy Industrial Automation",
       description: "Deployed a local-first IoT overhead crane telemetry control system featuring real-time hardware orchestration. Containerized a React dashboard and FastAPI middleware connected to a secure self-hosted Pocketbase backend using NGINX. Achieved low-latency safety controls by driving multiple ESP32 microcontrollers via a local Mosquitto MQTT broker.",
       tags: ["ESP32", "MQTT", "FastAPI", "Pocketbase", "React", "NGINX", "Docker", "XAMPP"],
