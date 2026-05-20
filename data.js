@@ -1,13 +1,12 @@
 export const data = {
   name: "A.M. Ismail",
   role: "System Architect & Developer",
-  resume: "./assets/resume_ismail.pdf",
+  resume: "./assets/resume_ismail-8.pdf",
   gamePath: [
       { "Dino": "./games/dino/dino.html" },
       { "Pacman": "./games/pacman/pacman.html" },
       { "Tetris": "./games/tetris/tetris.html" }
     ],
-  // REPLACE THESE LINKS WITH YOUR ACTUAL IMAGE PATHS (e.g., './assets/me.jpg')
   images: {
     profile: "./assets/me.jpeg", 
     hero: "./assets/hero.jpeg"
@@ -19,84 +18,99 @@ export const data = {
     github: "https://github.com/Isu-Ismail",
     linkedin: "https://www.linkedin.com/in/ismail-am" 
   },
-  about: "Production Engineering student focused on System Architecture and Rapid Prototyping. I specialize in designing distributed systems and utilize AI-augmented workflows to execute complex implementations efficiently. Tech-agnostic problem solver capable of deploying robust solutions across multiple environments.",
+  about: "Production Engineering student focused on the software behind automation. I sit right between hardware and software. My engineering background gives me a solid grasp of how machines work, but my main focus is on designing the software systems that run them. I map out the overall logic, figure out how data should flow, and design how things connect. I use AI to handle the actual coding syntax, which lets me focus 100% on building reliable, smart automation systems without getting slowed down by the typing.",
   education: [
     {
       degree: "B.E. Production Engineering",
       institution: "Madras Institute of Technology",
-      period: "Aug 2023 - Present",
-      description: "CGPA: 7.61/10. Currently in III Year."
+      period: "Aug 2023 - 2027",
+      description: "CGPA: 7.73/10. Currently in III Year."
     },
     {
       degree: "Higher Secondary (HSC)",
       institution: "L K Higher Secondary School",
       period: "2022 - 2023",
-      description: "Score: 90% (Bio-Maths)"
+      description: "Score: 545/600 (90.8%)"
+    }
+  ],
+  experience: [
+    {
+      role: "Chassis Design & Maintenance",
+      company: "MITONAUR Motorsports (Go-Kart Team)",
+      period: "Dec 2024 - Present",
+      description: "Structured structural simulations and engineering parameters on racing frames designed for the TNKC and KEC championships."
     }
   ],
   skills: [
-    "System Architecture", "Git", "Github(pages,actions)","CI/CD", "AI-Augmented Dev", "Docker", "Nginx", "Linux", "Python", "Flutter",  "Rapid Prototyping",  "System Integration",
+    "MQTT", "Docker", "Docker Swarm", "NGINX", "Pocketbase", "Prometheus", "Grafana", "JupyterHub", "Git", "XAMPP", "GlusterFS", "FireBase", "Python", "FastAPI", "React", "Flutter", "Arduino", "SolidWorks", "Creo", "NX CAD", "CATIA", "Abaqus CAE"
   ],
   interests: ["3D Printing", "Home Server Administration", "Karting", "Tech Exploration"],
   certificates: [
     {
       title: "RUSA 2.0 AI in Smart BMS",
-      image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80", // Replace with ./assets/cert-ai.jpg
+      image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80", 
       desc: "Hands-on training on AI applications in Smart Battery Management Systems."
     },
     {
       title: "Arduino Bootcamp",
-      image: "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=800&q=80", // Replace with ./assets/cert-arduino.jpg
+      image: "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=800&q=80", 
       desc: "Comprehensive bootcamp on microcontroller programming and hardware interaction."
     },
     {
       title: "Python for Data Science",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80", // Replace with ./assets/cert-python.jpg
+      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80", 
       desc: "Foundational course on Python libraries including Pandas and NumPy by IBM."
     }
   ],
   projects: [
     {
-      title: "Ct Ski (Local Colab)",
-      description: "Architected a distributed cloud computing platform using college infrastructure. Utilized Docker, NFS, and NextJS to handle heavy ML workloads for students.",
-      tags: ["Distributed Systems", "Docker", "NextJS"],
-      link: "https://github.com/Isu-Ismail/local-colab-v2"
+      title: "Sri Energy Industrial Automation",
+      description: "Deployed a local-first IoT overhead crane telemetry control system featuring real-time hardware orchestration. Containerized a React dashboard and FastAPI middleware connected to a secure self-hosted Pocketbase backend using NGINX. Achieved low-latency safety controls by driving multiple ESP32 microcontrollers via a local Mosquitto MQTT broker.",
+      tags: ["ESP32", "MQTT", "FastAPI", "Pocketbase", "React", "NGINX", "Docker", "XAMPP"],
+      link: "https://srienergy.com/",
+      status: "Completed"
     },
     {
-      title: "CWM (CLI Workspace Manager)",
-      description: "A Python-based CLI tool to automate developer workspace setup. Features session management (Tmux), command tracking, and project organization.",
-      tags: ["Python", "CLI", "Productivity"],
-      link: "https://github.com/Isu-Ismail/CWM"
-    },
-    {
-      title: "Anna University App",
-      description: "Contributed to the frontend development of the official e-Governance app using Flutter. Assisted in UI/UX implementation for large-scale user adoption.",
-      tags: ["Flutter", "Dart", "Mobile"],
-      link: "https://play.google.com/store/apps/details?id=com.cegov.AUeGov"
+      title: "Ct Ski (ML-Cloud Computing)",
+      description: "Architected a high-availability server cluster delivering high-performance cloud environments to CS students. Configured distributed storage and full infrastructure metric monitoring using Prometheus and Grafana stacks. Programmed a slot-based booking platform powered by FastAPI automation; launched and inaugurated by the CEO of Tekion.",
+      tags: ["Docker Swarm", "GlusterFS", "JupyterHub", "FastAPI", "Prometheus", "Grafana", "NFS"],
+      link: "https://ct.mitindia.edu/ctskii/",
+      status: "Completed"
     },
     {
       title: "Virtual Lab for Metrology",
-      description: "Designed a high-concurrency Virtual Lab suite with a Profile Projector simulator. Optimized for 100+ RPS using Nginx and Dockerized React containers.",
-      tags: ["React", "Nginx", "Simulation"],
-      link: "https://github.com/Isu-Ismail/virtual_lab"
+      description: "Designed a comprehensive web simulator handling physical Profile Projector operations and fundamental experiments. Consolidated 12 decoupled web microservices into a production ecosystem using NGINX file-based reverse proxy routing.",
+      tags: ["React", "Docker", "NGINX", "Simulation"],
+      link: "https://pt.mitindia.edu/virtuallab/",
+      status: "Completed"
     },
     {
-       title: "Chemical Treatment Plant Automation project(SRI enegry)",
-       description: "Automated a chemical treatment plant for SRI Energy. Developed a prototype model using Arduino and sensors to monitor and control the crane movement",
-       tags: ["Automation", "Hardware", "Prototype"],
-       link: "#"
+      title: "Seven5: Attendance Tracking App",
+      description: "Built an offline-first tracking mobile application syncing seamlessly with cloud dashboards via Google Drive API wrappers. Engineered dynamic predictive algorithms allowing users to run simulation strategies on personal leave and attendance metrics.",
+      tags: ["Flutter", "Hive", "Dart", "Google Drive API", "Cloud Run"],
+      link: "https://github.com/Isu-Ismail/ATTENDER_APP",
+      status: "Completed"
     },
     {
-      title: "Attender App",
-      description: "Mobile application to streamline attendance tracking for academic environments with a local database(hive) combined with the Google Drive API to ensure offline functionality as well as a cloud dashboard",
-      tags: ["Flutter", "Hive", "Utility", "Google Drive API"],
-      link: "https://github.com/Isu-Ismail/ATTENDER_APP"
+      title: "EggShell: Visual File Stitching Engine",
+      description: "Engineered a visual data pipeline editor that maps, filters, and stitches multi-format datasets into target outputs. Built a declarative JSON-driven pipeline architecture enabling multi-file transformations via a single config block. Integrated an inline SQLite custom script utility to parse string modifications and complex data-cleaning logic.",
+      tags: ["React", "JavaScript", "SQLite", "Data Pipeline"],
+      link: "https://isu-ismail.github.io/eggshell/",
+      status: "Completed"
     },
     {
-      title: "MITONAUR Motorsports",
-      description: "Designed chassis parts for the team go-kart. Participated in TNKC and KEC 2025 championships with focus on structural analysis.",
-      tags: ["Mechanical Design", "Automotive"],
-      link: "#"
+      title: "CWM (CLI Workspace Manager)",
+      description: "Engineered an automated command-line developer environment utility handling workspace state session mapping and task logs.",
+      tags: ["Python", "CLI", "Click", "Rich"],
+      link: "https://isu-ismail.github.io/cwm-docwebsite/index.html",
+      status: "Completed"
+    },
+    {
+      title: "Anna University App",
+      description: "Contributed to frontend implementation and UI asset scaling on the official enterprise e-Governance mobile workspace.",
+      tags: ["Flutter", "Dart", "Hive", "Mobile"],
+      link: "https://play.google.com/store/apps/details?id=com.cegov.AUeGov",
+      status: "Completed"
     }
   ]
 };

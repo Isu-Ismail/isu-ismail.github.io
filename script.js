@@ -179,6 +179,35 @@ const renderAbout = () => {
     `;
 };
 
+const renderExperience = () => {
+    const experience = document.getElementById('experience');
+    if (!experience || !data.experience || data.experience.length === 0) return;
+
+    const items = data.experience.map(exp => `
+        <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">
+                <i data-lucide="calendar" width="14"></i> ${exp.period}
+            </div>
+            <h3>${exp.role}</h3>
+            <h4 style="color: var(--muted); margin-bottom: 0.5rem;">${exp.company}</h4>
+            <p style="color: var(--muted); font-size: 0.9rem;">${exp.description || ''}</p>
+        </div>
+    `).join('');
+
+    experience.innerHTML = `
+        <div class="container">
+             <div style="text-center; max-width: 600px; margin: 0 auto 3rem auto; text-align: center;">
+                <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Experience</h2>
+                <p style="color: var(--muted);">My professional and extracurricular journey.</p>
+            </div>
+            <div class="timeline" style="max-width: 800px; margin: 0 auto;">
+                ${items}
+            </div>
+        </div>
+    `;
+};
+
 const renderEducation = () => {
     const education = document.getElementById('education');
     const items = data.education.map(edu => `
@@ -212,7 +241,10 @@ const renderProjects = () => {
         <div class="project-card">
             <div>
                 <div class="project-header">
-                    <h3 style="font-size: 1.25rem;">${project.title}</h3>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <h3 style="font-size: 1.25rem; margin: 0;">${project.title}</h3>
+                        ${project.status ? `<span class="status-badge status-${project.status.toLowerCase()}">${project.status}</span>` : ''}
+                    </div>
                     ${project.link !== '#' ? `<a href="${project.link}" target="_blank" style="color: var(--muted);"><i data-lucide="arrow-up-right"></i></a>` : ''}
                 </div>
                 <p style="color: var(--muted); font-size: 0.9rem;">${project.description}</p>
@@ -501,10 +533,15 @@ const initTerminal = () => {
 
         switch(cmd) {
             case 'help':
-                response = `Available commands: <span class="highlight">about, education, projects, skills, certificates, contact, clear, exit</span>`;
+                response = `Available commands: <span class="highlight">about, experience, education, projects, skills, certificates, contact, clear, exit</span>`;
                 break;
             case 'about':
                 response = data.about;
+                break;
+            case 'experience':
+                data.experience.forEach(exp => {
+                    response += `<div style="margin-bottom: 5px; color: #fff; font-weight: bold;">${exp.company}</div><div style="color: #888;">${exp.role} (${exp.period})</div><div style="color: #ccc; margin-bottom: 10px;">${exp.description}</div><br>`;
+                });
                 break;
             case 'education':
                 data.education.forEach(edu => {
@@ -513,7 +550,8 @@ const initTerminal = () => {
                 break;
             case 'projects':
                 data.projects.forEach(p => {
-                    response += `<div style="margin-bottom: 5px;"><span class="highlight">${p.title}</span> <span style="font-size: 0.8em; color: #666;">[${p.tags.join(', ')}]</span></div><div style="color: #ccc; margin-bottom: 10px;">${p.description}</div>`;
+                    const statusStr = p.status ? ` <span style="color: #10b981; font-weight: bold;">(${p.status})</span>` : '';
+                    response += `<div style="margin-bottom: 5px;"><span class="highlight">${p.title}</span>${statusStr} <span style="font-size: 0.8em; color: #666;">[${p.tags.join(', ')}]</span></div><div style="color: #ccc; margin-bottom: 10px;">${p.description}</div>`;
                 });
                 break;
             case 'certificates':
@@ -554,6 +592,7 @@ const initTerminal = () => {
 document.addEventListener('DOMContentLoaded', () => {
     renderHero();
     renderAbout();
+    renderExperience();
     renderEducation();
     renderProjects();
     renderCertificates();
