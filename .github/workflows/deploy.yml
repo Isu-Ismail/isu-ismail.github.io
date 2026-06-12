@@ -1,0 +1,49 @@
+name: Build and Deploy Portfolio
+
+on:
+  push:
+    branches:
+      - main # Triggers on pushing to main branch. Adjust if master is used.
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Install pnpm Package Manager
+        uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - name: Set up Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Build Production Bundle
+        run: pnpm run build
+
+      - name: Assemble Publish Assets
+        run: |
+          mkdir deploy_out
+          cp -r dist/* deploy_out/
+          # Copy static folders to deploy_out so all relative paths resolve correctly
+          cp -r assets deploy_out/ || true
+          cp -r project_pictures deploy_out/ || true
+          cp -r games deploy_out/ || true
+
+      - name: Push Bundle to publish Branch
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: deploy_out
+          branch: publish
+          clean: true
