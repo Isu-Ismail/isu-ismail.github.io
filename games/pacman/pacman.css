@@ -1,0 +1,129 @@
+/* games/pacman/style.css */
+
+:root {
+    --bg-color: #111;
+    --border-color: #1919A6;
+    --text-color: #FFD700;
+}
+
+body {
+    background-color: transparent; /* Changed to transparent for better blending */
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+.game-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    /* SCALE DOWN TO FIT IN CIRCLE */
+    transform: scale(0.85); 
+}
+
+/* UPDATED HEADER LAYOUT */
+.header {
+    display: flex;
+    flex-direction: column; /* Stack vertically to save width */
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 5;
+}
+
+h1 {
+    margin: 0 0 5px 0;
+    font-size: 20px; /* Smaller font */
+    color: #FFFF00;
+    text-shadow: 2px 2px #000;
+    letter-spacing: 2px;
+}
+
+.scores {
+    display: flex;
+    gap: 40px; /* Space out the scores */
+    text-align: center;
+    background: rgba(0,0,0,0.5); /* Semi-transparent background */
+    padding: 5px 15px;
+    border-radius: 20px;
+}
+
+.score-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.score-box span:first-child {
+    font-size: 10px;
+    color: #ccc;
+    margin-bottom: 2px;
+}
+
+.score-box span:last-child {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.canvas-container {
+    position: relative;
+    border: 4px solid var(--border-color);
+    border-radius: 4px;
+    box-shadow: 0 0 20px rgba(25, 25, 166, 0.4);
+    background: black;
+}
+
+canvas {
+    display: block;
+}
+
+.controls-hint {
+    color: rgba(255,255,255,0.5);
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+/* Overlay Styles */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.overlay h2 {
+    color: #FFFF00;
+    font-size: 32px;
+    margin: 0 0 10px 0;
+    text-shadow: 0 0 10px #FFFF00;
+}
+
+.overlay p {
+    color: white;
+    font-size: 14px;
+    animation: blink 1s infinite;
+}
+
+.hidden {
+    display: none;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}

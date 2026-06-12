@@ -1,0 +1,150 @@
+:root {
+    --text-color: #333333;
+    --sky-color: #f7f9fa;       /* Very light grey/white sky */
+    --ground-color: #e0e0e0;    /* Light grey ground */
+    --horizon-color: #999999;   /* Darker line for the horizon */
+}
+
+body {
+    background-color: transparent;
+    color: var(--text-color);
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* 1. THE MAIN CONTAINER */
+.game-wrapper {
+    width: 100%;
+    height: 100%;
+    
+    /* Make it rectangular (fill the card) */
+    border-radius: 0; 
+    border: none;
+    overflow: hidden;
+    position: relative;
+    
+    /* 2. THE HORIZON & GROUND */
+    /* This gradient creates the sharp line exactly in the center */
+    background: linear-gradient(
+        to bottom, 
+        var(--sky-color) 0%, 
+        var(--sky-color) 50%,     /* Sky ends */
+        var(--horizon-color) 50%, /* Horizon line starts */
+        var(--horizon-color) 50.5%, /* Thin horizon line ends */
+        var(--ground-color) 50.5%,  /* Ground starts */
+        var(--ground-color) 100%
+    );
+}
+
+/* 3. ATMOSPHERE (Drifting Clouds) */
+/* We use pseudo-elements to animate clouds behind the canvas */
+.game-wrapper::before {
+    content: "☁️"; 
+    font-size: 60px;
+    position: absolute;
+    top: 15%;
+    left: -120px;
+    opacity: 0.5;
+    filter: grayscale(100%) blur(1px); /* Misty look */
+    z-index: 1; /* Behind the canvas game */
+    animation: floatClouds 25s linear infinite;
+}
+
+.game-wrapper::after {
+    content: "☁️";
+    font-size: 40px;
+    position: absolute;
+    top: 25%;
+    left: -100px;
+    opacity: 0.3;
+    filter: grayscale(100%);
+    z-index: 1;
+    animation: floatClouds 35s linear infinite;
+    animation-delay: -15s; /* Start offset */
+}
+
+@keyframes floatClouds {
+    0% { transform: translateX(-50px); }
+    100% { transform: translateX(100vw); }
+}
+
+/* 4. CANVAS (Game Layer) */
+.canvas-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 2; /* Ensures game is drawn ABOVE the background clouds */
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    /* Transparent so we see the CSS background behind it */
+    background: transparent; 
+}
+
+/* 5. SCORE BOARD */
+.score-board {
+    position: absolute;
+    top: 20px; 
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-weight: bold;
+    font-size: 16px;
+    pointer-events: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.label { color: #888; font-size: 11px; margin-right: 4px; vertical-align: middle;}
+.divider { color: #ccc; margin: 0 8px; }
+
+/* 6. OVERLAY (Start Screen) */
+#gameOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: blur(3px); /* Glassmorphism effect */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.overlay-content {
+    text-align: center;
+}
+
+#statusText {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    letter-spacing: 2px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #333;
+}
+
+.overlay-content p {
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+    animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}

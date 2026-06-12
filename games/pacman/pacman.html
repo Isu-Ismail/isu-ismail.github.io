@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pacman Module</title>
+    <link rel="stylesheet" href="./pacman.css">
+</head>
+
+<body>
+
+    <div class="game-wrapper">
+        <div class="header">
+            <h1>PACMAN</h1>
+            <div class="scores">
+                <div class="score-box">
+                    <span>SCORE</span>
+                    <span id="score">0</span>
+                </div>
+                <div class="score-box">
+                    <span>HIGH</span>
+                    <span id="highScore">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="380" height="420"></canvas>
+
+            <div id="overlay" class="overlay">
+                <h2 id="overlay-title">READY?</h2>
+                <p>Click to Start</p>
+                <p class="mobile-hint">Use Arrow Keys</p>
+            </div>
+        </div>
+
+        <div class="controls-hint">
+            Arrow Keys to Move
+        </div>
+    </div>
+
+    <script src="./pacman.js"></script>
+</body>
+
+</html>

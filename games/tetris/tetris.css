@@ -1,0 +1,97 @@
+:root {
+    --bg-color: #202028;
+    --canvas-bg: #000;
+    --text-color: #fff;
+    --accent: #4f4f4f;
+    --border: #fff;
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.game-wrapper {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    background: #1a1a1a;
+}
+
+.game-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: right;
+    width: 150px;
+}
+
+h1 {
+    margin: 0 0 20px 0;
+    font-size: 2rem;
+    color: #ff5f56;
+}
+
+.score-box {
+    margin-bottom: 20px;
+}
+
+.score-box p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.score-box div {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.controls-hint {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: auto;
+}
+
+.canvas-container {
+    position: relative;
+    border: 2px solid var(--border);
+}
+
+canvas {
+    display: block;
+    background-color: var(--canvas-bg);
+}
+
+/* Overlay Styles */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.overlay h2 {
+    font-size: 2rem;
+    margin: 0;
+    color: #fff;
+}
+
+.hidden {
+    display: none;
+}

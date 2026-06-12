@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Runner Module</title>
+    <link rel="stylesheet" href="./dino.css">
+</head>
+
+<body>
+
+    <div class="game-wrapper">
+        <div class="canvas-container">
+            <div class="score-board">
+                <span class="label">HI</span> <span id="highScoreVal">0</span>
+                <span class="divider">|</span>
+                <span id="scoreVal">0</span>
+            </div>
+
+            <canvas id="runnerCanvas"></canvas>
+
+            <div id="gameOverlay">
+                <div class="overlay-content">
+                    <h2 id="statusText" style="color:#333">SYSTEM READY</h2>
+                    <p style="color:#666">Press SPACE to Run</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./dino.js"></script>
+</body>
+
+</html>
