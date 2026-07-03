@@ -91,7 +91,7 @@ export const data = {
       link: "https://github.com/Isu-Ismail/middleman",
       detailsLink: "./project_details/middleman.html",
       status: "Completed",
-      duration: "Jan 2026 - May 2026",
+      duration: "June 2026 - July 2026",
       stars: 5
     },
     {
@@ -101,7 +101,7 @@ export const data = {
       link: "https://github.com/Isu-Ismail/quran-competition-system",
       detailsLink: "./project_details/slqc.html",
       status: "Completed",
-      duration: "Mar 2026 - Jun 2026",
+      duration: "June 2026 - June 2026",
       stars: 5
     },
     {
