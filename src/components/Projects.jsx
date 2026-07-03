@@ -2,6 +2,8 @@ import React from 'react';
 import { ArrowUpRight, Calendar, Star } from 'lucide-react';
 
 export const Projects = ({ projects, onSelectProject }) => {
+  const sortedProjects = [...projects].sort((a, b) => (b.stars || 0) - (a.stars || 0));
+
   const getProjectAlias = (detailsLink) => {
     if (!detailsLink) return null;
     return detailsLink.split('/').pop().replace('.html', '');
@@ -127,7 +129,7 @@ export const Projects = ({ projects, onSelectProject }) => {
       </div>
 
       <div className="projects-grid-container">
-        {projects.map((project, idx) => {
+        {sortedProjects.map((project, idx) => {
           const alias = getProjectAlias(project.detailsLink);
           
           const handleCardClick = () => {

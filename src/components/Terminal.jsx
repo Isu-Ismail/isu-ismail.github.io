@@ -51,7 +51,8 @@ export const Terminal = ({ isOpen, onClose, data }) => {
         ).join('\n\n');
         break;
       case 'projects':
-        response = data.projects.map(p => {
+        const sortedProj = [...data.projects].sort((a, b) => (b.stars || 0) - (a.stars || 0));
+        response = sortedProj.map(p => {
           const rating = p.stars ? ` [Rating: ${p.stars}/5]` : '';
           return `★ ${p.title} (${p.status || 'Completed'})${rating}\n  - Tags: ${p.tags.join(', ')}\n  - ${p.description}`;
         }).join('\n\n');

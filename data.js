@@ -85,6 +85,26 @@ export const data = {
       stars: 5
     },
     {
+      title: "Middleman: Serverless Sourcing & RFQ Engine",
+      description: "An automated RFQ sourcing engine connecting mail streams to React Flow timelines and a serverless PocketBase backend.",
+      tags: ["React", "PocketBase", "React Flow", "Sourcing Engine", "Serverless", "Webhooks"],
+      link: "https://github.com/Isu-Ismail/middleman",
+      detailsLink: "./project_details/middleman.html",
+      status: "Completed",
+      duration: "Jan 2026 - May 2026",
+      stars: 5
+    },
+    {
+      title: "Quran Competition Management System (SQLC)",
+      description: "A web application suite designed to manage Quran competition registrations, venue allocations, dynamic marksheets, and interactive tie-resolution.",
+      tags: ["React", "TypeScript", "PocketBase", "Docker", "Nginx", "Leaderboards"],
+      link: "https://github.com/Isu-Ismail/quran-competition-system",
+      detailsLink: "./project_details/slqc.html",
+      status: "Completed",
+      duration: "Mar 2026 - Jun 2026",
+      stars: 5
+    },
+    {
       title: "CWM (Command Watch Manager)",
       description: "A complete workspace and shell history manager for developers. Catalog projects, quick-jump to editors, search history banks, switch GitHub accounts, and copy token-condensed codebase contexts.",
       tags: ["Python", "CLI", "Click", "Rich", "AI Integration", "Workspace Manager", "Developer Tools"],
