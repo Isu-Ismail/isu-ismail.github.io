@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { data } from '../data.js';
 import { projectDetailsData } from './projectDetailsData.js';
 import { Navbar } from './components/Navbar';
@@ -22,57 +23,28 @@ const LinkedinIcon = ({ size = 20 }) => (
 
 export default function App() {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
-  const [view, setView] = useState({ type: 'home', projectId: null });
   const [terminalOpen, setTerminalOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Sync theme to body element
+  // Sync theme to root element
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Sync state view with History API hash routing
-  useEffect(() => {
-    const handleUrlChange = () => {
-      const hash = window.location.hash;
-      const match = hash.match(/(?:#\/|.*\/)(projects|project)\/([^\/]+)/);
-      if (match) {
-        const projectId = match[2];
-        if (projectId && projectDetailsData[projectId]) {
-          setView({ type: 'detail', projectId });
-          return;
-        }
-      }
-      setView({ type: 'home', projectId: null });
-    };
-
-    // Run once on load
-    handleUrlChange();
-
-    window.addEventListener('hashchange', handleUrlChange);
-    return () => window.removeEventListener('hashchange', handleUrlChange);
-  }, []);
-
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  const handleSelectProject = (projectId) => {
-    window.location.hash = `/projects/${projectId}`;
-    setView({ type: 'detail', projectId });
+  const currentView = location.pathname.startsWith('/projects/') ? 'detail' : 'home';
+
+  // Handle fake navigation state passed to Navbar component
+  const handleNavbarSetView = (viewObj) => {
+    if (viewObj.type === 'home') {
+      navigate('/');
+    }
   };
-
-  const handleBackToHome = () => {
-    window.location.hash = '/';
-    setView({ type: 'home', projectId: null });
-  };
-
-  // Build current project for details view
-  const currentProject = view.type === 'detail' 
-    ? data.projects.find(p => p.detailsLink && p.detailsLink.includes(view.projectId))
-    : null;
-
-  const currentProjectDetails = view.type === 'detail' ? projectDetailsData[view.projectId] : null;
 
   return (
     <>
@@ -80,133 +52,130 @@ export default function App() {
         theme={theme}
         toggleTheme={toggleTheme}
         toggleTerminal={() => setTerminalOpen(!terminalOpen)}
-        currentView={view.type}
-        setView={setView}
+        currentView={currentView}
+        setView={handleNavbarSetView}
         resumeUrl={data.resume}
         githubUrl={data.contact.github}
         linkedinUrl={data.contact.linkedin}
       />
 
       <main className="min-h-[calc(100vh-4.5rem-12rem)]">
-        {view.type === 'home' ? (
-          <>
-            <section id="hero" className="bg-bg-primary">
-              <Hero
-                role={data.role}
-                name={data.name}
-                about={data.about}
-                resumeUrl={data.resume}
-                githubUrl={data.contact.github}
-                linkedinUrl={data.contact.linkedin}
-                data={data}
-              />
-            </section>
-
-            <section id="about" className="py-24 border-t border-border-color bg-bg-secondary">
-              <About
-                aboutText={data.about}
-                profileImg={data.images.profile}
-                projectsCount={data.projects.length}
-              />
-            </section>
-
-            <section id="projects" className="py-24 border-t border-border-color bg-bg-tertiary">
-              <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
-                <Projects
-                  projects={data.projects}
-                  onSelectProject={handleSelectProject}
+        <Routes>
+          <Route path="/" element={
+            <>
+              <section id="hero" className="bg-bg-primary">
+                <Hero
+                  role={data.role}
+                  name={data.name}
+                  about={data.about}
+                  resumeUrl={data.resume}
+                  githubUrl={data.contact.github}
+                  linkedinUrl={data.contact.linkedin}
+                  data={data}
                 />
-              </div>
-            </section>
+              </section>
 
-            <section id="education" className="py-24 border-t border-border-color bg-bg-secondary">
-              <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
-                <Timeline
-                  title="Education"
-                  subtitle="My academic history and parameters."
-                  items={data.education}
+              <section id="about" className="py-24 border-t border-border-color bg-bg-secondary">
+                <About
+                  aboutText={data.about}
+                  profileImg={data.images.profile}
+                  projectsCount={data.projects.length}
                 />
-              </div>
-            </section>
+              </section>
 
-            <section id="experience" className="py-24 border-t border-border-color bg-bg-tertiary">
-              <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
-                <Timeline
-                  title="Experience"
-                  subtitle="My extracurricular design and hardware simulation tasks."
-                  items={data.experience}
-                />
-              </div>
-            </section>
-
-            {data.certificates && data.certificates.length > 0 && (
-              <section id="certificates" className="py-24 border-t border-border-color bg-bg-secondary">
+              <section id="projects" className="py-24 border-t border-border-color bg-bg-tertiary">
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
-                  <Certificates certificates={data.certificates} />
+                  <Projects
+                    projects={data.projects}
+                    onSelectProject={(projectId) => navigate(`/projects/${projectId}`)}
+                  />
                 </div>
               </section>
-            )}
 
-            <section id="skills" className="py-24 border-t border-border-color bg-bg-tertiary">
-              <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
-                <Skills skills={data.skills} />
-              </div>
-            </section>
+              <section id="education" className="py-24 border-t border-border-color bg-bg-secondary">
+                <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
+                  <Timeline
+                    title="Education"
+                    subtitle="My academic history and parameters."
+                    items={data.education}
+                  />
+                </div>
+              </section>
 
-            <section id="contact" className="py-24 border-t border-border-color bg-bg-secondary">
-              <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
-                  <div className="space-y-6 text-left">
-                    <h2 className="text-5xl font-extrabold tracking-tight leading-none text-text-primary">Let's work together.</h2>
-                    <p className="text-lg text-text-secondary">
-                      I'm always open to discussing new projects, automation designs, database engineering pipelines, or smart server configurations.
-                    </p>
-                    <div className="flex flex-col gap-6">
-                      <div className="flex items-center gap-5">
-                        <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary flex-shrink-0"><Mail size={18} /></span>
-                        <span className="text-lg font-medium text-text-primary">{data.contact.email}</span>
-                      </div>
-                      <div className="flex items-center gap-5">
-                        <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary flex-shrink-0"><Phone size={18} /></span>
-                        <span className="text-lg font-medium text-text-primary">{data.contact.phone}</span>
-                      </div>
-                      <div className="flex items-center gap-5">
-                        <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary flex-shrink-0"><MapPin size={18} /></span>
-                        <span className="text-lg font-medium text-text-primary">{data.contact.location}</span>
+              <section id="experience" className="py-24 border-t border-border-color bg-bg-tertiary">
+                <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
+                  <Timeline
+                    title="Experience"
+                    subtitle="My extracurricular design and hardware simulation tasks."
+                    items={data.experience}
+                  />
+                </div>
+              </section>
+
+              {data.certificates && data.certificates.length > 0 && (
+                <section id="certificates" className="py-24 border-t border-border-color bg-bg-secondary">
+                  <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
+                    <Certificates certificates={data.certificates} />
+                  </div>
+                </section>
+              )}
+
+              <section id="skills" className="py-24 border-t border-border-color bg-bg-tertiary">
+                <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
+                  <Skills skills={data.skills} />
+                </div>
+              </section>
+
+              <section id="contact" className="py-24 border-t border-border-color bg-bg-secondary">
+                <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
+                    <div className="space-y-6 text-left">
+                      <h2 className="text-5xl font-extrabold tracking-tight leading-none text-text-primary">Let's work together.</h2>
+                      <p className="text-lg text-text-secondary">
+                        I'm always open to discussing new projects, automation designs, database engineering pipelines, or smart server configurations.
+                      </p>
+                      <div className="flex flex-col gap-6">
+                        <div className="flex items-center gap-5">
+                          <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary flex-shrink-0"><Mail size={18} /></span>
+                          <span className="text-lg font-medium text-text-primary">{data.contact.email}</span>
+                        </div>
+                        <div className="flex items-center gap-5">
+                          <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary flex-shrink-0"><Phone size={18} /></span>
+                          <span className="text-lg font-medium text-text-primary">{data.contact.phone}</span>
+                        </div>
+                        <div className="flex items-center gap-5">
+                          <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary flex-shrink-0"><MapPin size={18} /></span>
+                          <span className="text-lg font-medium text-text-primary">{data.contact.location}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="bg-bg-secondary border border-border-color p-10 rounded-3xl shadow-xl">
-                    <form onSubmit={(e) => e.preventDefault()} className="space-y-5 text-left">
-                      <div className="flex flex-col gap-2">
-                        <label htmlFor="name" className="text-sm font-semibold text-text-secondary">Name</label>
-                        <input type="text" id="name" className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="Your Name" required />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label htmlFor="email" className="text-sm font-semibold text-text-secondary">Email</label>
-                        <input type="email" id="email" className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="you@example.com" required />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label htmlFor="message" className="text-sm font-semibold text-text-secondary">Message</label>
-                        <textarea id="message" className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" rows="4" placeholder="Tell me about your project or opportunity..." required></textarea>
-                      </div>
-                      <button type="submit" className="w-full mt-2 inline-flex items-center justify-center gap-2 p-3.5 rounded-full font-semibold text-sm cursor-pointer transition-all border-none outline-none bg-primary text-bg-secondary hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30">
-                        Send Message
-                      </button>
-                    </form>
+                    <div className="bg-bg-secondary border border-border-color p-10 rounded-3xl shadow-xl">
+                      <form onSubmit={(e) => e.preventDefault()} className="space-y-5 text-left">
+                        <div className="flex flex-col gap-2">
+                          <label htmlFor="name" className="text-sm font-semibold text-text-secondary">Name</label>
+                          <input type="text" id="name" className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="Your Name" required />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label htmlFor="email" className="text-sm font-semibold text-text-secondary">Email</label>
+                          <input type="email" id="email" className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="you@example.com" required />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <label htmlFor="message" className="text-sm font-semibold text-text-secondary">Message</label>
+                          <textarea id="message" className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" rows="4" placeholder="Tell me about your project or opportunity..." required></textarea>
+                        </div>
+                        <button type="submit" className="w-full mt-2 inline-flex items-center justify-center gap-2 p-3.5 rounded-full font-semibold text-sm cursor-pointer transition-all border-none outline-none bg-primary text-bg-secondary hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30">
+                          Send Message
+                        </button>
+                      </form>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </section>
-          </>
-        ) : (
-          <ProjectDetail
-            project={currentProject}
-            details={currentProjectDetails}
-            onBack={handleBackToHome}
-          />
-        )}
+              </section>
+            </>
+          } />
+          <Route path="/projects/:projectId" element={<ProjectDetailWrapper />} />
+        </Routes>
       </main>
 
       <footer className="border-t border-border-color py-12 bg-bg-secondary text-text-muted">
@@ -234,5 +203,33 @@ export default function App() {
         data={data}
       />
     </>
+  );
+}
+
+// Wrapper component to feed URL parameters into the ProjectDetail component
+function ProjectDetailWrapper() {
+  const { projectId } = useParams();
+  const navigate = useNavigate();
+
+  const currentProject = data.projects.find(p => p.detailsLink && p.detailsLink.includes(projectId));
+  const currentProjectDetails = projectDetailsData[projectId];
+
+  if (!currentProject || !currentProjectDetails) {
+    return (
+      <div className="py-32 text-center text-text-primary text-xl">
+        <p className="mb-4">Project not found.</p>
+        <button onClick={() => navigate('/')} className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-sm cursor-pointer transition-all border-none bg-primary text-bg-secondary hover:bg-primary-hover">
+          Back to Home
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <ProjectDetail
+      project={currentProject}
+      details={currentProjectDetails}
+      onBack={() => navigate('/')}
+    />
   );
 }
