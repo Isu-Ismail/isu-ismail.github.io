@@ -31,11 +31,11 @@ export default function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Sync state view with History API pathname routing
+  // Sync state view with History API hash routing
   useEffect(() => {
     const handleUrlChange = () => {
-      const path = window.location.pathname;
-      const match = path.match(/(?:^\/|.*\/)(projects|project)\/([^\/]+)/);
+      const hash = window.location.hash;
+      const match = hash.match(/(?:#\/|.*\/)(projects|project)\/([^\/]+)/);
       if (match) {
         const projectId = match[2];
         if (projectId && projectDetailsData[projectId]) {
@@ -49,8 +49,8 @@ export default function App() {
     // Run once on load
     handleUrlChange();
 
-    window.addEventListener('popstate', handleUrlChange);
-    return () => window.removeEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => window.removeEventListener('hashchange', handleUrlChange);
   }, []);
 
   const toggleTheme = () => {
@@ -58,17 +58,12 @@ export default function App() {
   };
 
   const handleSelectProject = (projectId) => {
-    const base = window.location.pathname.replace(/\/(projects|project)\/[^\/]+$/, '');
-    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
-    const newPath = `${cleanBase}/projects/${projectId}`;
-    window.history.pushState(null, '', newPath);
+    window.location.hash = `/projects/${projectId}`;
     setView({ type: 'detail', projectId });
   };
 
   const handleBackToHome = () => {
-    const base = window.location.pathname.replace(/\/(projects|project)\/[^\/]+$/, '');
-    const newPath = base === '' ? '/' : base;
-    window.history.pushState(null, '', newPath);
+    window.location.hash = '/';
     setView({ type: 'home', projectId: null });
   };
 
