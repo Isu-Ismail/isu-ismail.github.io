@@ -1,23 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
     <defs>
         <linearGradient id="gradBg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#1e293b"/>
-            <stop offset="100%" stop-color="#0f172a"/>
+            <stop offset="0%" stop-color="#12131a"/>
+            <stop offset="100%" stop-color="#090a0f"/>
         </linearGradient>
-        <linearGradient id="gradI" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#60a5fa"/>
-            <stop offset="100%" stop-color="#2563eb"/>
+        <linearGradient id="gradGold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f3d078"/>
+            <stop offset="50%" stop-color="#d4af37"/>
+            <stop offset="100%" stop-color="#a37b4c"/>
         </linearGradient>
     </defs>
     
-    <rect width="120" height="120" rx="28" fill="url(#gradBg)"/>
+    <!-- Background Card -->
+    <rect width="120" height="120" rx="32" fill="url(#gradBg)"/>
     
-    <!-- Top Bar -->
-    <rect x="35" y="30" width="50" height="12" rx="6" fill="url(#gradI)"/>
+    <!-- Gold Border Ring -->
+    <rect x="6" y="6" width="108" height="108" rx="26" fill="none" stroke="url(#gradGold)" stroke-width="2.5" opacity="0.8"/>
     
-    <!-- Bottom Bar -->
-    <rect x="35" y="78" width="50" height="12" rx="6" fill="url(#gradI)"/>
+    <!-- Lowercase "i" (Dot & Stem) -->
+    <!-- The Dot -->
+    <circle cx="60" cy="38" r="8" fill="url(#gradGold)"/>
     
-    <!-- Middle Stem -->
-    <rect x="52" y="38" width="16" height="44" rx="4" fill="url(#gradI)"/>
+    <!-- The Stem (Line below the dot) -->
+    <rect x="53" y="54" width="14" height="34" rx="7" fill="url(#gradGold)"/>
 </svg>
