@@ -1,7 +1,7 @@
 export const data = {
   name: "A.M. Ismail",
   role: "System Architect & Engineer",
-  resume: "./assets/resume_ismail-8.pdf",
+  resume: "./assets/resume_ismail.pdf",
   gamePath: [
     { "Dino": "./games/dino/dino.html" },
     { "Pacman": "./games/pacman/pacman.html" },
@@ -34,6 +34,13 @@ export const data = {
     }
   ],
   experience: [
+    {
+      role: "Industrial Intern (Production & Operations)",
+      company: "SRI Energy Valves Private Limited",
+      period: "June 2026",
+      description: "Underwent focused observational training in industrial valve assembly and shop-floor inventory operations; studied step-by-step mechanical workflows, defect inspection, and systematic part transport logistics.",
+      certificateLink: "./project_pictures/sriautoamtion/certificate.png"
+    },
     {
       role: "Chassis Design & Maintenance",
       company: "MITONAUR Motorsports (Go-Kart Team)",

@@ -100,7 +100,7 @@ export const projectDetailsData = {
   "sriautoamtion": {
     subtitle: "A highly modular 3-layer overhead crane telemetry and real-time control system retrofitted with zero disruption to old physical controls.",
     images: Array.from({ length: 9 }, (_, i) => `./project_pictures/sriautoamtion/${i + 1}.jpeg`),
-    certificate: "./project_pictures/sriautomation/certificate.png",
+    certificate: "./project_pictures/sriautoamtion/certificate.png",
     metrics: [
       { value: "3 Layers", label: "Decoupled Architecture" },
       { value: "₹5,000", label: "Development Budget" },

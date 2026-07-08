@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { resolveAssetPath } from '../utils';
 import { 
   ArrowLeft, ExternalLink, Calendar, GitBranch, Layers, Award,
   ChevronLeft, ChevronRight, X, Terminal, MessageSquare, Cpu, Shuffle, 
@@ -38,9 +39,9 @@ export const ProjectDetail = ({ project, details, onBack }) => {
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
   // Combine project images and certificate into a single list for lightbox navigation
-  const allMedia = [...(details.images || [])];
+  const allMedia = (details.images || []).map(resolveAssetPath);
   if (details.certificate) {
-    allMedia.push(details.certificate);
+    allMedia.push(resolveAssetPath(details.certificate));
   }
 
   useEffect(() => {
@@ -164,8 +165,8 @@ export const ProjectDetail = ({ project, details, onBack }) => {
           >
             {details.images.map((imgUrl, idx) => (
               <div key={idx} className="min-w-full h-full relative cursor-pointer overflow-hidden flex items-center justify-center" onClick={() => openLightbox(idx)}>
-                <img src={imgUrl} className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-45 scale-11" alt="" />
-                <img src={imgUrl} className="relative max-h-full max-w-full object-contain z-10 transition-transform duration-500 hover:scale-[1.01]" alt={`Slide ${idx + 1}`} />
+                <img src={resolveAssetPath(imgUrl)} className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-45 scale-11" alt="" />
+                <img src={resolveAssetPath(imgUrl)} className="relative max-h-full max-w-full object-contain z-10 transition-transform duration-500 hover:scale-[1.01]" alt={`Slide ${idx + 1}`} />
               </div>
             ))}
           </div>
@@ -278,10 +279,10 @@ export const ProjectDetail = ({ project, details, onBack }) => {
             </>
           )}
 
-          <div className="max-w-[90%] max-h-[85%] flex items-center justify-center">
+          <div className="max-w-[90vw] max-h-[85vh] flex items-center justify-center">
             <img 
               src={allMedia[lightboxIndex]} 
-              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" 
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl" 
               alt="Enlarged Project Media" 
             />
           </div>
