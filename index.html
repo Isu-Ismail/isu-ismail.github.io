@@ -7,6 +7,31 @@
     <title>A.M. Ismail | Portfolio - Systems Architect & Developer</title>
     <meta name="description" content="Portfolio of A.M. Ismail - Systems Architect & Developer specializing in industrial automation, local-first architectures, containerized microservices, and custom CLI tools." />
 
+    <!-- Start Single Page Apps for GitHub Pages Redirect Handler -->
+    <script type="text/javascript">
+      (function(l) {
+        if (l.search[1] === 'p') {
+          var decoded = l.search.slice(1).split('&').map(function(s) {
+            return s.replace(/~and~/g, '&')
+          }).filter(function(s) {
+            return s.slice(0, 2) === 'p='
+          })[0];
+          if (decoded) {
+            var path = decoded.slice(2);
+            var q = l.search.slice(1).split('&').filter(function(s) {
+              return s.slice(0, 2) !== 'p='
+            }).join('&');
+            if (q) q = '?' + q.replace(/~and~/g, '&');
+            window.history.replaceState(null, null,
+              l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+              l.pathname + path + q + l.hash
+            );
+          }
+        }
+      }(window.location));
+    </script>
+    <!-- End Single Page Apps for GitHub Pages Redirect Handler -->
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

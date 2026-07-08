@@ -25,11 +25,14 @@ export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, setVie
     e.preventDefault();
     setMobileMenuOpen(false);
     if (currentView !== 'home') {
-      setView({ type: 'home', projectId: null });
+      const base = window.location.pathname.replace(/\/(projects|project)\/[^\/]+$/, '');
+      const newPath = base === '' ? '/' : base;
+      window.history.pushState(null, '', newPath);
+      window.dispatchEvent(new Event('popstate'));
       setTimeout(() => {
         const element = document.getElementById(sectionId);
         if (element) element.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      }, 150);
     } else {
       const element = document.getElementById(sectionId);
       if (element) element.scrollIntoView({ behavior: 'smooth' });
@@ -48,167 +51,18 @@ export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, setVie
 
   return (
     <>
-      <style>{`
-        .navbar {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          z-index: 100;
-          height: 4.5rem;
-          display: flex;
-          align-items: center;
-          transition: background-color var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal);
-          border-bottom: 1px solid transparent;
-        }
-        .navbar-scrolled {
-          background-color: var(--glass-bg);
-          backdrop-filter: blur(var(--glass-blur));
-          -webkit-backdrop-filter: blur(var(--glass-blur));
-          border-bottom-color: var(--border-color);
-          box-shadow: var(--shadow-sm);
-        }
-        .nav-container {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .logo {
-          font-family: var(--font-heading);
-          font-size: 1.5rem;
-          font-weight: 800;
-          letter-spacing: -0.02em;
-          display: flex;
-          align-items: center;
-        }
-        .logo-dot {
-          color: var(--color-primary);
-        }
-        .nav-links-desktop {
-          display: flex;
-          align-items: center;
-          gap: 1.5rem;
-        }
-        @media (max-width: 992px) {
-          .nav-links-desktop {
-            display: none;
-          }
-        }
-        .nav-item-link {
-          font-size: 0.9rem;
-          font-weight: 500;
-          color: var(--text-secondary);
-        }
-        .nav-item-link:hover {
-          color: var(--color-primary);
-        }
-        .nav-actions {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
-        .action-icon-btn {
-          background: none;
-          border: 1px solid var(--border-color);
-          color: var(--text-primary);
-          padding: 0.5rem;
-          border-radius: 50%;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all var(--transition-fast);
-          width: 38px;
-          height: 38px;
-        }
-        .action-icon-btn:hover {
-          background-color: var(--bg-tertiary);
-          border-color: var(--color-primary);
-          color: var(--color-primary);
-        }
-        .mobile-toggle-btn {
-          display: none;
-        }
-        @media (max-width: 992px) {
-          .mobile-toggle-btn {
-            display: flex;
-          }
-        }
-        
-        /* Mobile Drawer */
-        .mobile-drawer {
-          position: fixed;
-          top: 0;
-          right: 0;
-          bottom: 0;
-          width: 280px;
-          z-index: 110;
-          background-color: var(--bg-secondary);
-          box-shadow: var(--shadow-xl);
-          padding: 2rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-          transform: translateX(100%);
-          transition: transform var(--transition-normal);
-        }
-        .mobile-drawer-open {
-          transform: translateX(0);
-        }
-        .mobile-drawer-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 109;
-          background: rgba(0, 0, 0, 0.4);
-          backdrop-filter: blur(2px);
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity var(--transition-normal);
-        }
-        .mobile-drawer-overlay-active {
-          opacity: 1;
-          pointer-events: auto;
-        }
-        .drawer-close {
-          align-self: flex-end;
-          background: none;
-          border: none;
-          cursor: pointer;
-          color: var(--text-primary);
-        }
-        .mobile-nav-links {
-          display: flex;
-          flex-direction: column;
-          gap: 1.25rem;
-          margin-top: 1rem;
-        }
-        .mobile-nav-link {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--text-primary);
-        }
-        .drawer-divider {
-          height: 1px;
-          background-color: var(--border-color);
-          width: 100%;
-        }
-      `}</style>
-
-      <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
-        <div className="container nav-container">
-          <a href="#" className="logo" onClick={(e) => handleNavClick(e, 'hero')}>
-            Ismail<span className="logo-dot">.</span>
+      <nav className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-all duration-300 border-b border-transparent ${scrolled ? 'bg-bg-secondary/70 backdrop-blur-md border-border-color shadow-sm' : ''}`}>
+        <div className="max-w-7xl mx-auto px-6 w-full flex justify-between items-center">
+          <a href="#" className="font-heading text-2xl font-extrabold tracking-tight flex items-center text-text-primary" onClick={(e) => handleNavClick(e, 'hero')}>
+            Ismail<span className="text-primary">.</span>
           </a>
 
-          <div className="nav-links-desktop">
+          <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
               <a
                 key={link.id}
                 href={`#${link.id}`}
-                className="nav-item-link"
+                className="text-sm font-semibold text-text-secondary hover:text-primary transition-colors duration-200"
                 onClick={(e) => handleNavClick(e, link.id)}
               >
                 {link.label}
@@ -216,20 +70,20 @@ export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, setVie
             ))}
           </div>
 
-          <div className="nav-actions">
-            <a href={resumeUrl} download className="btn btn-outline resume-btn-desktop" style={{ display: 'inline-flex', padding: '0.5rem 1.2rem', fontSize: '0.85rem' }}>
+          <div className="flex items-center gap-3">
+            <a href={resumeUrl} download className="hidden sm:inline-flex items-center justify-center px-5 py-2 border border-border-color bg-bg-secondary text-text-primary hover:text-primary hover:border-primary rounded-full text-sm font-semibold transition-all duration-200 shadow-sm">
               Resume
             </a>
 
-            <button onClick={toggleTerminal} className="action-icon-btn" title="Open Terminal">
+            <button onClick={toggleTerminal} className="flex items-center justify-center w-10 h-10 rounded-full border border-border-color bg-bg-secondary text-text-primary hover:text-primary hover:border-primary transition-all duration-200 cursor-pointer shadow-sm" title="Open Terminal">
               <Terminal size={18} />
             </button>
 
-            <button onClick={toggleTheme} className="action-icon-btn" title="Toggle Theme">
+            <button onClick={toggleTheme} className="flex items-center justify-center w-10 h-10 rounded-full border border-border-color bg-bg-secondary text-text-primary hover:text-primary hover:border-primary transition-all duration-200 cursor-pointer shadow-sm" title="Toggle Theme">
               {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
 
-            <button onClick={() => setMobileMenuOpen(true)} className="action-icon-btn mobile-toggle-btn">
+            <button onClick={() => setMobileMenuOpen(true)} className="flex lg:hidden items-center justify-center w-10 h-10 rounded-full border border-border-color bg-bg-secondary text-text-primary hover:text-primary hover:border-primary transition-all duration-200 cursor-pointer shadow-sm">
               <Menu size={18} />
             </button>
           </div>
@@ -238,42 +92,42 @@ export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, setVie
 
       {/* Drawer Overlay */}
       <div 
-        className={`mobile-drawer-overlay ${mobileMenuOpen ? 'mobile-drawer-overlay-active' : ''}`}
+        className={`fixed inset-0 z-[109] bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setMobileMenuOpen(false)}
       />
 
       {/* Mobile Drawer */}
-      <div className={`mobile-drawer ${mobileMenuOpen ? 'mobile-drawer-open' : ''}`}>
-        <button className="drawer-close" onClick={() => setMobileMenuOpen(false)}>
+      <div className={`fixed top-0 right-0 bottom-0 w-[280px] z-[110] bg-bg-secondary shadow-2xl p-8 flex flex-col gap-6 transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <button className="self-end text-text-primary hover:text-primary transition-colors cursor-pointer" onClick={() => setMobileMenuOpen(false)}>
           <X size={24} />
         </button>
 
-        <div className="mobile-nav-links">
+        <div className="flex flex-col gap-5 mt-4 text-left">
           {navLinks.map((link) => (
             <a
               key={link.id}
               href={`#${link.id}`}
-              className="mobile-nav-link"
+              className="text-lg font-bold text-text-primary hover:text-primary transition-colors"
               onClick={(e) => handleNavClick(e, link.id)}
             >
               {link.label}
             </a>
           ))}
-          <a href={resumeUrl} download className="mobile-nav-link" style={{ color: 'var(--color-primary)' }}>
+          <a href={resumeUrl} download className="text-lg font-bold text-primary hover:underline">
             Download Resume
           </a>
         </div>
 
-        <div className="drawer-divider" />
+        <div className="h-[1px] bg-border-color w-full" />
 
-        <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center' }}>
+        <div className="flex gap-4 justify-center">
           {githubUrl && (
-            <a href={githubUrl} target="_blank" rel="noreferrer" className="action-icon-btn">
+            <a href={githubUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center w-10 h-10 rounded-full border border-border-color bg-bg-secondary text-text-primary hover:text-primary hover:border-primary transition-all duration-200">
               <GithubIcon size={18} />
             </a>
           )}
           {linkedinUrl && (
-            <a href={linkedinUrl} target="_blank" rel="noreferrer" className="action-icon-btn">
+            <a href={linkedinUrl} target="_blank" rel="noreferrer" className="flex items-center justify-center w-10 h-10 rounded-full border border-border-color bg-bg-secondary text-text-primary hover:text-primary hover:border-primary transition-all duration-200">
               <LinkedinIcon size={18} />
             </a>
           )}

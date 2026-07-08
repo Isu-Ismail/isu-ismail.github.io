@@ -100,18 +100,19 @@ export const projectDetailsData = {
   "sriautoamtion": {
     subtitle: "A highly modular 3-layer overhead crane telemetry and real-time control system retrofitted with zero disruption to old physical controls.",
     images: Array.from({ length: 9 }, (_, i) => `./project_pictures/sriautoamtion/${i + 1}.jpeg`),
+    certificate: "./project_pictures/sriautomation/certificate.png",
     metrics: [
       { value: "3 Layers", label: "Decoupled Architecture" },
       { value: "₹5,000", label: "Development Budget" },
-      { value: "2x Nodes", label: "ESP32s Per Crane Redundancy" },
+      { value: "2x Nodes", label: "ESP32-S3-ETH Redundancy" },
       { value: "10 Sensors", label: "Proximity Limit Sensors" }
     ],
     techSpecs: [
-      { label: "MCU Module", value: "ESP32-S3-ETH (Ethernet)" },
+      { label: "MCU Module", value: "ESP32-S3-ETH" },
       { label: "Broker Admin Panel", value: "Mosquitto Go-Auth Dashboard" },
       { label: "Message Protocol", value: "MQTT (TLS Secured)" },
       { label: "Automation VM", value: "Ubuntu Server (VMware)" },
-      { label: "Sensors", value: "10x Proximity Limit Inductives" },
+      { label: "Sensors", value: "10x Inductive Proximity Sensors" },
       { label: "Wiring Connectors", value: "Push-in Spring Terminals" }
     ],
     architectureTitle: "3-Layer Control Flow",

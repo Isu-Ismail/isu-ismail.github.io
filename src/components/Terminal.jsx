@@ -92,154 +92,52 @@ export const Terminal = ({ isOpen, onClose, data }) => {
   };
 
   return (
-    <>
-      <style>{`
-        .terminal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: rgba(0, 0, 0, 0.65);
-          backdrop-filter: blur(4px);
-          z-index: 200;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 1.5rem;
-        }
-        .terminal-window {
-          width: 100%;
-          max-width: 700px;
-          height: 480px;
-          background-color: #0d1117;
-          border: 1px solid #30363d;
-          border-radius: 12px;
-          display: flex;
-          flex-direction: column;
-          box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
-          overflow: hidden;
-          font-family: var(--font-mono);
-        }
-        .terminal-header {
-          background-color: #161b22;
-          padding: 0.75rem 1rem;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 1px solid #30363d;
-          user-select: none;
-        }
-        .terminal-dots {
-          display: flex;
-          gap: 0.5rem;
-        }
-        .terminal-dot {
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          display: inline-block;
-        }
-        .dot-close { background-color: #f85149; cursor: pointer; }
-        .dot-min { background-color: #f0883e; }
-        .dot-max { background-color: #56d364; }
-        
-        .terminal-title-text {
-          color: #8b949e;
-          font-size: 0.8rem;
-          font-weight: 500;
-        }
-        .terminal-body {
-          flex: 1;
-          padding: 1.25rem;
-          overflow-y: auto;
-          color: #c9d1d9;
-          font-size: 0.875rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-        }
-        .line-prompt {
-          color: #58a6ff;
-          font-weight: bold;
-          margin-right: 0.5rem;
-        }
-        .line-cmd {
-          color: #f2f4f8;
-        }
-        .line-response {
-          white-space: pre-wrap;
-          color: #c9d1d9;
-          line-height: 1.6;
-        }
-        .line-system {
-          color: #8b949e;
-          font-style: italic;
-        }
-        .terminal-input-row {
-          display: flex;
-          align-items: center;
-          background-color: #0d1117;
-          padding: 0.5rem 1.25rem 1.25rem 1.25rem;
-        }
-        .terminal-raw-input {
-          flex: 1;
-          background: none;
-          border: none;
-          outline: none;
-          color: #56d364;
-          font-family: var(--font-mono);
-          font-size: 0.875rem;
-        }
-      `}</style>
+    <div className="fixed inset-0 bg-black/65 backdrop-blur-sm z-[200] flex items-center justify-center p-6" onClick={handleOverlayClick}>
+      <div className="w-full max-w-2xl h-[480px] bg-[#0d1117] border border-[#30363d] rounded-2xl flex flex-col shadow-2xl overflow-hidden font-mono text-left animate-fade-in">
+        <div className="bg-[#161b22] px-5 py-3 flex items-center justify-between border-b border-[#30363d] select-none">
+          <div className="flex gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-red-500 cursor-pointer" onClick={onClose} />
+            <span className="w-3 h-3 rounded-full bg-amber-500" />
+            <span className="w-3 h-3 rounded-full bg-emerald-500" />
+          </div>
+          <span className="text-xs text-[#8b949e] font-semibold mr-10">ismail@portfolio-shell:~</span>
+          <div style={{ width: '40px' }} />
+        </div>
 
-      <div className="terminal-overlay" onClick={handleOverlayClick}>
-        <div className="terminal-window animate-fade-in">
-          <div className="terminal-header">
-            <div className="terminal-dots">
-              <span className="terminal-dot dot-close" onClick={onClose} />
-              <span className="terminal-dot dot-min" />
-              <span className="terminal-dot dot-max" />
+        <div className="flex-1 p-5 overflow-y-auto text-sm text-[#c9d1d9] flex flex-col gap-3" ref={outputRef}>
+          {history.map((line, idx) => (
+            <div key={idx}>
+              {line.type === 'input' && (
+                <div>
+                  <span className="text-[#58a6ff] font-bold mr-2">➜</span>
+                  <span className="text-[#f2f4f8]">{line.text}</span>
+                </div>
+              )}
+              {line.type === 'response' && (
+                <div className="whitespace-pre-wrap text-[#c9d1d9] leading-relaxed">{line.text}</div>
+              )}
+              {line.type === 'system' && (
+                <div className="text-[#8b949e] italic">{line.text}</div>
+              )}
             </div>
-            <span className="terminal-title-text">ismail@portfolio-shell:~</span>
-            <div style={{ width: '40px' }} />
-          </div>
+          ))}
+        </div>
 
-          <div className="terminal-body" ref={outputRef}>
-            {history.map((line, idx) => (
-              <div key={idx}>
-                {line.type === 'input' && (
-                  <div>
-                    <span className="line-prompt">➜</span>
-                    <span className="line-cmd">{line.text}</span>
-                  </div>
-                )}
-                {line.type === 'response' && (
-                  <div className="line-response">{line.text}</div>
-                )}
-                {line.type === 'system' && (
-                  <div className="line-system">{line.text}</div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="terminal-input-row" onClick={() => inputRef.current?.focus()}>
-            <span className="line-prompt">➜</span>
-            <input
-              ref={inputRef}
-              type="text"
-              className="terminal-raw-input"
-              value={inputVal}
-              onChange={(e) => setInputVal(e.target.value)}
-              onKeyDown={handleKeyDown}
-              autoComplete="off"
-              spellCheck="false"
-              placeholder="Type command..."
-            />
-          </div>
+        <div className="flex items-center bg-[#0d1117] px-5 pb-5 pt-2 cursor-text" onClick={() => inputRef.current?.focus()}>
+          <span className="text-[#58a6ff] font-bold mr-2">➜</span>
+          <input
+            ref={inputRef}
+            type="text"
+            className="flex-1 bg-transparent border-none outline-none text-[#56d364] font-mono text-sm caret-[#58a6ff] w-full"
+            value={inputVal}
+            onChange={(e) => setInputVal(e.target.value)}
+            onKeyDown={handleKeyDown}
+            autoComplete="off"
+            spellCheck="false"
+            placeholder="Type command..."
+          />
         </div>
       </div>
-    </>
+    </div>
   );
 };

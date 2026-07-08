@@ -1,6 +1,6 @@
 export const data = {
   name: "A.M. Ismail",
-  role: "System Architect & Developer",
+  role: "System Architect & Engineer",
   resume: "./assets/resume_ismail-8.pdf",
   gamePath: [
     { "Dino": "./games/dino/dino.html" },
@@ -18,13 +18,13 @@ export const data = {
     github: "https://github.com/Isu-Ismail",
     linkedin: "https://www.linkedin.com/in/ismail-am"
   },
-  about: "Production Engineering student focused on the software behind automation. I sit right between hardware and software. My engineering background gives me a solid grasp of how machines work, but my main focus is on designing the software systems that run them. I map out the overall logic, figure out how data should flow, and design how things connect. I use AI to handle the actual coding syntax, which lets me focus 100% on building reliable, smart automation systems without getting slowed down by the typing.",
+  about: "Engineering student specializing in industrial automation and distributed systems. I bridge mechanical engineering fundamentals with software architecture—designing IoT control systems, deploying multi-node compute infrastructure, and building production-grade automation for real industrial environments. My background gives me a solid grasp of physical machinery, while my focus remains on mapping logical data flows and designing the software systems that run them. Proven track record of delivering reliable systems that run 24/7 in manufacturing and academic settings.",
   education: [
     {
       degree: "B.E. Production Engineering",
       institution: "Madras Institute of Technology",
       period: "Aug 2023 - 2027",
-      description: "CGPA: 7.73/10. Currently in IV Year."
+      description: "CGPA: 7.74/10. Currently in IV Year."
     },
     {
       degree: "Higher Secondary (HSC)",

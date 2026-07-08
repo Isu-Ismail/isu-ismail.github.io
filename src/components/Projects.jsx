@@ -27,108 +27,12 @@ export const Projects = ({ projects, onSelectProject }) => {
 
   return (
     <>
-      <style>{`
-        .projects-header-block {
-          text-align: center;
-          max-width: 600px;
-          margin: 0 auto 4rem auto;
-        }
-        .projects-sec-title {
-          font-size: 2.5rem;
-          margin-bottom: 0.5rem;
-        }
-        .projects-sec-subtitle {
-          color: var(--text-muted);
-          font-size: 1.05rem;
-        }
-        .projects-grid-container {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-          gap: 2rem;
-        }
-        @media (max-width: 576px) {
-          .projects-grid-container {
-            grid-template-columns: 1fr;
-          }
-        }
-        .project-card {
-          background-color: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-          border-radius: 16px;
-          padding: 2rem;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          height: 100%;
-          cursor: pointer;
-          transition: all var(--transition-normal);
-        }
-        .project-card:hover {
-          border-color: var(--color-primary);
-          transform: translateY(-4px);
-          box-shadow: var(--shadow-lg);
-        }
-        .proj-card-top {
-          margin-bottom: 1.5rem;
-        }
-        .proj-title-bar {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          gap: 1rem;
-          margin-bottom: 0.75rem;
-        }
-        .proj-title {
-          font-size: 1.25rem;
-          font-weight: 700;
-          color: var(--text-primary);
-        }
-        .proj-meta-badges {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.4rem;
-          margin-bottom: 0.75rem;
-          align-items: center;
-        }
-        .proj-duration-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 0.25rem;
-          font-size: 0.75rem;
-          color: var(--text-muted);
-          background-color: var(--bg-tertiary);
-          padding: 0.2rem 0.5rem;
-          border-radius: 4px;
-          border: 1px solid var(--border-color);
-        }
-        .proj-desc {
-          color: var(--text-secondary);
-          font-size: 0.925rem;
-          line-height: 1.6;
-          margin-top: 0.5rem;
-        }
-        .proj-tags-box {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.4rem;
-          margin-top: auto;
-        }
-        .proj-tag-pill {
-          font-family: var(--font-mono);
-          font-size: 0.75rem;
-          color: var(--text-muted);
-          background-color: var(--bg-tertiary);
-          padding: 0.2rem 0.5rem;
-          border-radius: 4px;
-        }
-      `}</style>
-
-      <div className="projects-header-block">
-        <h2 className="projects-sec-title">Featured Projects</h2>
-        <p className="projects-sec-subtitle">Architecture. Development. Industrial Automation.</p>
+      <div className="text-center max-w-xl mx-auto mb-16 space-y-2">
+        <h2 className="text-4xl font-extrabold text-text-primary">Featured Projects</h2>
+        <p className="text-text-muted text-base">Architecture. Development. Industrial Automation.</p>
       </div>
 
-      <div className="projects-grid-container">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {sortedProjects.map((project, idx) => {
           const alias = getProjectAlias(project.detailsLink);
           
@@ -141,23 +45,27 @@ export const Projects = ({ projects, onSelectProject }) => {
           };
 
           return (
-            <div key={idx} className="project-card" onClick={handleCardClick}>
-              <div className="proj-card-top">
-                <div className="proj-title-bar">
-                  <h3 className="proj-title">{project.title}</h3>
-                  <span style={{ color: 'var(--text-muted)' }}>
+            <div key={idx} className="bg-bg-secondary border border-border-color rounded-2xl p-8 flex flex-col justify-between h-full cursor-pointer transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-xl" onClick={handleCardClick}>
+              <div className="mb-4">
+                <div className="flex justify-between items-start gap-4 mb-3">
+                  <h3 className="text-lg font-bold text-text-primary">{project.title}</h3>
+                  <span className="text-text-muted hover:text-primary transition-colors">
                     <ArrowUpRight size={18} />
                   </span>
                 </div>
 
-                <div className="proj-meta-badges">
+                <div className="flex flex-wrap gap-2 mb-3 items-center">
                   {project.status && (
-                    <span className={`badge badge-${project.status.toLowerCase() === 'completed' ? 'completed' : 'in-progress'}`}>
+                    <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
+                      project.status.toLowerCase() === 'completed'
+                        ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                        : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                    }`}>
                       {project.status}
                     </span>
                   )}
                   {project.duration && (
-                    <span className="proj-duration-badge">
+                    <span className="inline-flex items-center gap-1 text-[10px] text-text-muted bg-bg-tertiary px-2 py-0.5 rounded border border-border-color">
                       <Calendar size={10} />
                       {project.duration}
                     </span>
@@ -166,12 +74,12 @@ export const Projects = ({ projects, onSelectProject }) => {
 
                 {renderStars(project.stars)}
 
-                <p className="proj-desc">{project.description}</p>
+                <p className="text-text-secondary text-sm leading-relaxed mt-2">{project.description}</p>
               </div>
 
-              <div className="proj-tags-box">
+              <div className="flex flex-wrap gap-1.5 mt-auto pt-4">
                 {project.tags.map((tag, tIdx) => (
-                  <span key={tIdx} className="proj-tag-pill">
+                  <span key={tIdx} className="font-mono text-[10px] text-text-muted bg-bg-tertiary px-2 py-0.5 rounded">
                     {tag}
                   </span>
                 ))}

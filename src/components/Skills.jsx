@@ -35,92 +35,21 @@ export const Skills = ({ skills }) => {
 
   return (
     <>
-      <style>{`
-        .skills-header {
-          text-align: center;
-          margin-bottom: 4rem;
-        }
-        .skills-title {
-          font-size: 2.5rem;
-          margin-bottom: 0.5rem;
-        }
-        .skills-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-          gap: 2rem;
-        }
-        .skill-category-card {
-          background-color: var(--bg-secondary);
-          border: 1px solid var(--border-color);
-          border-radius: 16px;
-          padding: 2rem;
-          transition: all var(--transition-normal);
-        }
-        .skill-category-card:hover {
-          border-color: var(--color-primary);
-          transform: translateY(-4px);
-          box-shadow: var(--shadow-lg);
-        }
-        .category-title-area {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          margin-bottom: 1.5rem;
-          color: var(--text-primary);
-        }
-        .category-icon {
-          color: var(--color-primary);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background-color: rgba(var(--color-primary-rgb), 0.08);
-          padding: 0.5rem;
-          border-radius: 8px;
-        }
-        .category-name {
-          font-size: 1.25rem;
-          font-weight: 700;
-          font-family: var(--font-heading);
-        }
-        .skills-pill-box {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.6rem;
-        }
-        .skill-pill {
-          font-family: var(--font-mono);
-          font-size: 0.825rem;
-          font-weight: 500;
-          background-color: var(--bg-tertiary);
-          color: var(--text-secondary);
-          padding: 0.4rem 0.8rem;
-          border-radius: 8px;
-          border: 1px solid var(--border-color);
-          transition: all var(--transition-fast);
-        }
-        .skill-pill:hover {
-          background-color: rgba(var(--color-primary-rgb), 0.08);
-          border-color: var(--color-primary);
-          color: var(--color-primary);
-          transform: scale(1.05);
-        }
-      `}</style>
-
-      <div className="skills-header">
-        <h2 className="skills-title">Technical Arsenal</h2>
-        <p style={{ color: 'var(--text-muted)' }}>Tools and frameworks I leverage to design automation and system architectures.</p>
+      <div className="text-center mb-16 space-y-2">
+        <h2 className="text-4xl font-extrabold text-text-primary">Technical Arsenal</h2>
+        <p className="text-text-muted text-base">Tools and frameworks I leverage to design automation and system architectures.</p>
       </div>
 
-      <div className="skills-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {categories.map((cat, idx) => (
-          <div key={idx} className="skill-category-card">
-            <div className="category-title-area">
-              <span className="category-icon">{cat.icon}</span>
-              <h3 className="category-name">{cat.title}</h3>
+          <div key={idx} className="bg-bg-secondary border border-border-color rounded-2xl p-8 transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-xl">
+            <div className="flex items-center gap-3.5 mb-6 text-text-primary text-left">
+              <span className="text-primary flex items-center justify-center bg-primary/10 p-2.5 rounded-lg">{cat.icon}</span>
+              <h3 className="text-lg font-bold font-heading">{cat.title}</h3>
             </div>
-            <div className="skills-pill-box">
+            <div className="flex flex-wrap gap-2.5 text-left">
               {cat.items.map((skill, sIdx) => (
-                <span key={sIdx} className="skill-pill">
+                <span key={sIdx} className="font-mono text-xs font-medium bg-bg-tertiary text-text-secondary px-3.5 py-1.5 rounded-lg border border-border-color transition-all duration-200 hover:bg-primary/10 hover:border-primary hover:text-primary hover:scale-105 cursor-default">
                   {skill}
                 </span>
               ))}

@@ -27,19 +27,48 @@ export default function App() {
 
   // Sync theme to body element
   useEffect(() => {
-    document.body.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  // Sync state view with History API pathname routing
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const path = window.location.pathname;
+      const match = path.match(/(?:^\/|.*\/)(projects|project)\/([^\/]+)/);
+      if (match) {
+        const projectId = match[2];
+        if (projectId && projectDetailsData[projectId]) {
+          setView({ type: 'detail', projectId });
+          return;
+        }
+      }
+      setView({ type: 'home', projectId: null });
+    };
+
+    // Run once on load
+    handleUrlChange();
+
+    window.addEventListener('popstate', handleUrlChange);
+    return () => window.removeEventListener('popstate', handleUrlChange);
+  }, []);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
   };
 
   const handleSelectProject = (projectId) => {
+    const base = window.location.pathname.replace(/\/(projects|project)\/[^\/]+$/, '');
+    const cleanBase = base.endsWith('/') ? base.slice(0, -1) : base;
+    const newPath = `${cleanBase}/projects/${projectId}`;
+    window.history.pushState(null, '', newPath);
     setView({ type: 'detail', projectId });
   };
 
   const handleBackToHome = () => {
+    const base = window.location.pathname.replace(/\/(projects|project)\/[^\/]+$/, '');
+    const newPath = base === '' ? '/' : base;
+    window.history.pushState(null, '', newPath);
     setView({ type: 'home', projectId: null });
   };
 
@@ -63,10 +92,10 @@ export default function App() {
         linkedinUrl={data.contact.linkedin}
       />
 
-      <main style={{ minHeight: 'calc(100vh - 4.5rem - 12rem)' }}>
+      <main className="min-h-[calc(100vh-4.5rem-12rem)]">
         {view.type === 'home' ? (
           <>
-            <section id="hero">
+            <section id="hero" className="bg-bg-primary">
               <Hero
                 role={data.role}
                 name={data.name}
@@ -74,10 +103,11 @@ export default function App() {
                 resumeUrl={data.resume}
                 githubUrl={data.contact.github}
                 linkedinUrl={data.contact.linkedin}
+                data={data}
               />
             </section>
 
-            <section id="about" className="section" style={{ borderTop: '1px solid var(--border-color)' }}>
+            <section id="about" className="py-24 border-t border-border-color bg-bg-secondary">
               <About
                 aboutText={data.about}
                 profileImg={data.images.profile}
@@ -85,8 +115,8 @@ export default function App() {
               />
             </section>
 
-            <section id="projects" className="section" style={{ borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--bg-tertiary)' }}>
-              <div className="container">
+            <section id="projects" className="py-24 border-t border-border-color bg-bg-tertiary">
+              <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                 <Projects
                   projects={data.projects}
                   onSelectProject={handleSelectProject}
@@ -94,8 +124,8 @@ export default function App() {
               </div>
             </section>
 
-            <section id="education" className="section" style={{ borderTop: '1px solid var(--border-color)' }}>
-              <div className="container">
+            <section id="education" className="py-24 border-t border-border-color bg-bg-secondary">
+              <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                 <Timeline
                   title="Education"
                   subtitle="My academic history and parameters."
@@ -104,8 +134,8 @@ export default function App() {
               </div>
             </section>
 
-            <section id="experience" className="section" style={{ borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--bg-tertiary)' }}>
-              <div className="container">
+            <section id="experience" className="py-24 border-t border-border-color bg-bg-tertiary">
+              <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                 <Timeline
                   title="Experience"
                   subtitle="My extracurricular design and hardware simulation tasks."
@@ -115,116 +145,58 @@ export default function App() {
             </section>
 
             {data.certificates && data.certificates.length > 0 && (
-              <section id="certificates" className="section" style={{ borderTop: '1px solid var(--border-color)' }}>
-                <div className="container">
+              <section id="certificates" className="py-24 border-t border-border-color bg-bg-secondary">
+                <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                   <Certificates certificates={data.certificates} />
                 </div>
               </section>
             )}
 
-            <section id="skills" className="section" style={{ borderTop: '1px solid var(--border-color)', backgroundColor: 'var(--bg-tertiary)' }}>
-              <div className="container">
+            <section id="skills" className="py-24 border-t border-border-color bg-bg-tertiary">
+              <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                 <Skills skills={data.skills} />
               </div>
             </section>
 
-            <section id="contact" className="section" style={{ borderTop: '1px solid var(--border-color)' }}>
-              <div className="container">
-                <style>{`
-                  .contact-grid {
-                    display: grid;
-                    grid-template-columns: 1.1fr 0.9fr;
-                    gap: 5rem;
-                    align-items: start;
-                  }
-                  @media (max-width: 992px) {
-                    .contact-grid {
-                      grid-template-columns: 1fr;
-                      gap: 3.5rem;
-                    }
-                  }
-                  .contact-title-col h2 {
-                    font-size: 3rem;
-                    line-height: 1.1;
-                    margin-bottom: 1.5rem;
-                    letter-spacing: -0.02em;
-                  }
-                  .contact-intro-text {
-                    font-size: 1.1rem;
-                    color: var(--text-secondary);
-                    margin-bottom: 3rem;
-                  }
-                  .contact-info-list {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 1.5rem;
-                  }
-                  .contact-item-box {
-                    display: flex;
-                    align-items: center;
-                    gap: 1.25rem;
-                  }
-                  .contact-icon-wrapper {
-                    background-color: rgba(var(--color-primary-rgb), 0.08);
-                    color: var(--color-primary);
-                    width: 46px;
-                    height: 46px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-shrink: 0;
-                  }
-                  .contact-val-text {
-                    font-size: 1.05rem;
-                    font-weight: 500;
-                    color: var(--text-primary);
-                  }
-                  .contact-card-box {
-                    background-color: var(--bg-secondary);
-                    border: 1px solid var(--border-color);
-                    padding: 2.5rem;
-                    border-radius: 20px;
-                    box-shadow: var(--shadow-xl);
-                  }
-                `}</style>
-                <div className="contact-grid">
-                  <div className="contact-title-col">
-                    <h2>Let's work together.</h2>
-                    <p className="contact-intro-text">
+            <section id="contact" className="py-24 border-t border-border-color bg-bg-secondary">
+              <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
+                  <div className="space-y-6 text-left">
+                    <h2 className="text-5xl font-extrabold tracking-tight leading-none text-text-primary">Let's work together.</h2>
+                    <p className="text-lg text-text-secondary">
                       I'm always open to discussing new projects, automation designs, database engineering pipelines, or smart server configurations.
                     </p>
-                    <div className="contact-info-list">
-                      <div className="contact-item-box">
-                        <span className="contact-icon-wrapper"><Mail size={18} /></span>
-                        <span className="contact-val-text">{data.contact.email}</span>
+                    <div className="flex flex-col gap-6">
+                      <div className="flex items-center gap-5">
+                        <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary flex-shrink-0"><Mail size={18} /></span>
+                        <span className="text-lg font-medium text-text-primary">{data.contact.email}</span>
                       </div>
-                      <div className="contact-item-box">
-                        <span className="contact-icon-wrapper"><Phone size={18} /></span>
-                        <span className="contact-val-text">{data.contact.phone}</span>
+                      <div className="flex items-center gap-5">
+                        <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary flex-shrink-0"><Phone size={18} /></span>
+                        <span className="text-lg font-medium text-text-primary">{data.contact.phone}</span>
                       </div>
-                      <div className="contact-item-box">
-                        <span className="contact-icon-wrapper"><MapPin size={18} /></span>
-                        <span className="contact-val-text">{data.contact.location}</span>
+                      <div className="flex items-center gap-5">
+                        <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary flex-shrink-0"><MapPin size={18} /></span>
+                        <span className="text-lg font-medium text-text-primary">{data.contact.location}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="contact-card-box">
-                    <form onSubmit={(e) => e.preventDefault()}>
-                      <div className="form-group">
-                        <label htmlFor="name">Name</label>
-                        <input type="text" id="name" className="form-input" placeholder="Your Name" required />
+                  <div className="bg-bg-secondary border border-border-color p-10 rounded-3xl shadow-xl">
+                    <form onSubmit={(e) => e.preventDefault()} className="space-y-5 text-left">
+                      <div className="flex flex-col gap-2">
+                        <label htmlFor="name" className="text-sm font-semibold text-text-secondary">Name</label>
+                        <input type="text" id="name" className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="Your Name" required />
                       </div>
-                      <div className="form-group">
-                        <label htmlFor="email">Email</label>
-                        <input type="email" id="email" className="form-input" placeholder="you@example.com" required />
+                      <div className="flex flex-col gap-2">
+                        <label htmlFor="email" className="text-sm font-semibold text-text-secondary">Email</label>
+                        <input type="email" id="email" className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="you@example.com" required />
                       </div>
-                      <div className="form-group">
-                        <label htmlFor="message">Message</label>
-                        <textarea id="message" className="form-input" rows="4" placeholder="Tell me about your project or opportunity..." required></textarea>
+                      <div className="flex flex-col gap-2">
+                        <label htmlFor="message" className="text-sm font-semibold text-text-secondary">Message</label>
+                        <textarea id="message" className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" rows="4" placeholder="Tell me about your project or opportunity..." required></textarea>
                       </div>
-                      <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>
+                      <button type="submit" className="w-full mt-2 inline-flex items-center justify-center gap-2 p-3.5 rounded-full font-semibold text-sm cursor-pointer transition-all border-none outline-none bg-primary text-bg-secondary hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30">
                         Send Message
                       </button>
                     </form>
@@ -242,22 +214,22 @@ export default function App() {
         )}
       </main>
 
-      <footer style={{ borderTop: '1px solid var(--border-color)', padding: '3rem 0', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-muted)' }}>
-        <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem', textAlign: 'center' }}>
-          <div style={{ display: 'flex', gap: '1rem' }}>
+      <footer className="border-t border-border-color py-12 bg-bg-secondary text-text-muted">
+        <div className="max-w-6xl mx-auto px-6 md:px-16 w-full flex flex-col items-center gap-4 text-center">
+          <div className="flex gap-4">
             {data.contact.github && (
-              <a href={data.contact.github} target="_blank" rel="noreferrer" style={{ color: 'var(--text-muted)' }}>
+              <a href={data.contact.github} target="_blank" rel="noreferrer" className="text-text-muted hover:text-primary transition-colors">
                 <GithubIcon size={20} />
               </a>
             )}
             {data.contact.linkedin && (
-              <a href={data.contact.linkedin} target="_blank" rel="noreferrer" style={{ color: 'var(--text-muted)' }}>
+              <a href={data.contact.linkedin} target="_blank" rel="noreferrer" className="text-text-muted hover:text-primary transition-colors">
                 <LinkedinIcon size={20} />
               </a>
             )}
           </div>
-          <p>&copy; {new Date().getFullYear()} {data.name}. All rights reserved.</p>
-          <p style={{ fontSize: '0.8rem', opacity: 0.8 }}>Designed with React, Vite & pnpm.</p>
+          <p className="text-sm">&copy; {new Date().getFullYear()} {data.name}. All rights reserved.</p>
+          <p className="text-xs opacity-70">Designed with React, Vite, TailwindCSS v4 & pnpm.</p>
         </div>
       </footer>
 
