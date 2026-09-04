@@ -40,7 +40,7 @@ export const data = {
       company: "SRI Energy Valves Private Limited",
       period: "June 2026",
       description: "Underwent focused observational training in industrial valve assembly and shop-floor inventory operations; studied step-by-step mechanical workflows, defect inspection, and systematic part transport logistics.",
-      certificateLink: "./certificates/sri_internship.png"
+      certificateLink: "./assets/sri_internship.png"
     },
     {
       role: "Chassis Design & Maintenance",
