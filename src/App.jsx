@@ -21,6 +21,10 @@ const LinkedinIcon = ({ size = 20 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
 );
 
+const InstagramIcon = ({ size = 20 }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+);
+
 export default function App() {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [terminalOpen, setTerminalOpen] = useState(false);
@@ -57,6 +61,7 @@ export default function App() {
         resumeUrl={data.resume}
         githubUrl={data.contact.github}
         linkedinUrl={data.contact.linkedin}
+        instagramUrl={data.contact.instagram}
       />
 
       <main className="min-h-[calc(100vh-4.5rem-12rem)]">
@@ -71,6 +76,7 @@ export default function App() {
                   resumeUrl={data.resume}
                   githubUrl={data.contact.github}
                   linkedinUrl={data.contact.linkedin}
+                  instagramUrl={data.contact.instagram}
                   data={data}
                 />
               </section>
@@ -182,13 +188,18 @@ export default function App() {
         <div className="max-w-6xl mx-auto px-6 md:px-16 w-full flex flex-col items-center gap-4 text-center">
           <div className="flex gap-4">
             {data.contact.github && (
-              <a href={data.contact.github} target="_blank" rel="noreferrer" className="text-text-muted hover:text-primary transition-colors">
+              <a href={data.contact.github} target="_blank" rel="noreferrer" title="GitHub" className="text-text-muted hover:text-primary transition-colors">
                 <GithubIcon size={20} />
               </a>
             )}
             {data.contact.linkedin && (
-              <a href={data.contact.linkedin} target="_blank" rel="noreferrer" className="text-text-muted hover:text-primary transition-colors">
+              <a href={data.contact.linkedin} target="_blank" rel="noreferrer" title="LinkedIn" className="text-text-muted hover:text-primary transition-colors">
                 <LinkedinIcon size={20} />
+              </a>
+            )}
+            {data.contact.instagram && (
+              <a href={data.contact.instagram.startsWith('http') ? data.contact.instagram : `https://instagram.com/${data.contact.instagram.replace('@', '')}`} target="_blank" rel="noreferrer" title="Instagram" className="text-text-muted hover:text-primary transition-colors">
+                <InstagramIcon size={20} />
               </a>
             )}
           </div>

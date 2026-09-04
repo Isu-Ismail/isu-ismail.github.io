@@ -12,11 +12,12 @@ export const data = {
     hero: "./assets/hero.jpeg"
   },
   contact: {
-    email: "ismailsims1@gmail.com",
-    phone: "81248 14896",
+    email: "ismailisims1@gmail.com",
+    phone: "+91 81248 14896",
     location: "Chennai, India",
     github: "https://github.com/Isu-Ismail",
-    linkedin: "https://www.linkedin.com/in/ismail-am"
+    linkedin: "https://www.linkedin.com/in/ismail-am",
+    instagram: "https://www.instagram.com/ismail_isims"
   },
   about: "Engineering student specializing in industrial automation and distributed systems. I bridge mechanical engineering fundamentals with software architecture—designing IoT control systems, deploying multi-node compute infrastructure, and building production-grade automation for real industrial environments. My background gives me a solid grasp of physical machinery, while my focus remains on mapping logical data flows and designing the software systems that run them. Proven track record of delivering reliable systems that run 24/7 in manufacturing and academic settings.",
   education: [
@@ -133,10 +134,20 @@ export const data = {
       stars: 4
     },
     {
+      title: "NeoCGPA: Intelligent GPA/CGPA Calculator & Target Planner",
+      description: "A client-side GPA/CGPA tracker built with Svelte 5. Features instant calculations, in-browser Tesseract.js OCR marksheet scanning, vector PDF export, and target CGPA goal planning.",
+      tags: ["Svelte 5", "Vite", "Tesseract.js", "OCR", "jsPDF", "Firebase", "Neo-Brutalism"],
+      link: "https://codism.in/neocgpa/",
+      detailsLink: "./project_details/cgpa.html",
+      status: "Completed",
+      duration: "Aug 2026 – Sep 2026",
+      stars: 3
+    },
+    {
       title: "EggShell: Visual Relational Data Pipeline Builder",
       description: "A local-first, visual database pipeline workspace to stitch and clean spreadsheet data using an in-browser SQLite Web Worker and React Flow canvas.",
       tags: ["React", "SQLite", "React Flow", "Web Worker", "OPFS", "Data Pipeline", "Client-Side Privacy"],
-      link: "https://isu-ismail.github.io/eggshell/",
+      link: "https://codism.in/eggshell/",
       detailsLink: "./project_details/eggshell.html",
       status: "Completed",
       duration: "May 2026",
@@ -147,7 +158,7 @@ export const data = {
       title: "Virtual Lab for Metrology",
       description: "A web simulator for physical Profile Projector metrology experiments. Combines 12 decoupled microservices routed via NGINX reverse proxy.",
       tags: ["React", "Docker", "NGINX", "Simulation"],
-      link: "https://pt.mitindia.edu/virtuallab/",
+      link: "https://ptmit-org.github.io/virtuallab/",
       detailsLink: "./project_details/virtuallab.html",
       status: "Completed",
       duration: "Sep 2025 – Apr 2026",

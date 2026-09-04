@@ -1,7 +1,7 @@
 export const projectDetailsData = {
   "middleman": {
     subtitle: "An automated Request for Quote (RFQ) sourcing engine connecting mail streams to React Flow visual timelines and a serverless PocketBase backend.",
-    images: [],
+    images: Array.from({ length: 16 }, (_, i) => `./project_pictures/middleman/${i + 1}.png`),
     metrics: [
       { value: "Serverless", label: "PocketBase VM Hooks" },
       { value: "React Flow", label: "Interactive Timeline Map" },
@@ -50,7 +50,7 @@ export const projectDetailsData = {
   },
   "slqc": {
     subtitle: "A premium web application suite automating participant registration, stage venue allocation, dynamic marksheet templates, and interactive tie-resolution.",
-    images: [],
+    images: Array.from({ length: 18 }, (_, i) => `./project_pictures/slqc/${i + 1}.png`),
     metrics: [
       { value: "Docker-Compose", label: "Carrier Volume Deployment" },
       { value: "WASM / SQLite", label: "PocketBase DB Engine" },
@@ -369,28 +369,22 @@ export const projectDetailsData = {
     ]
   },
   "virtuallab": {
-    subtitle: "A web simulator for physical Profile Projector metrology experiments, combining 12 decoupled microservices routed via NGINX reverse proxy.",
+    subtitle: "A web simulator for physical Profile Projector metrology experiments, Devloped by the collective efforts of students and combined and orchestrated by me ",
     images: Array.from({ length: 6 }, (_, i) => `./project_pictures/virtuallab/${i + 1}.png`),
     metrics: [
-      { value: "12 Services", label: "Dockerized Microservices" },
-      { value: "React SPA", label: "Interactive Canvas UI" },
-      { value: "NGINX Proxy", label: "Subdomain Route Gateway" },
-      { value: "XAMPP Host", label: "MIT Institutional Server" }
+      { value: "Github Pages", label: "Interactive Canvas UI" },
+      { value: "Metology Lab", label: "Metrology Experiments" },
+      { value: "Engineering Drawing Lab", label: "Engineering Drawing Labs" },
+      { value: "Manufacturing Lab", label: "Manufacturing Labs (not integrated yet)" },
     ],
     techSpecs: [
       { label: "Frontend Stack", value: "React / Vite" },
-      { label: "Routing Gateway", value: "NGINX Reverse Proxy" },
-      { label: "Orchestrator", value: "Docker Compose" },
-      { label: "Host Platform", value: "Windows Server / XAMPP" },
       { label: "Canvas Engine", value: "HTML5 Canvas / Interaction" },
-      { label: "API Framework", value: "FastAPI (Python)" }
     ],
     architectureTitle: "Metrology Virtual Lab Architecture",
     architectureNodes: [
       { title: "Student Web Browser", desc: "Interactive SPA canvas dashboard", icon: "monitor" },
-      { title: "NGINX Gateway Proxy", desc: "Resolves subdirectories & paths", icon: "shield" },
       { title: "React Microservices", desc: "12 Decoupled experiment apps", icon: "grid" },
-      { title: "FastAPI Math Engine", desc: "Computes tolerances & calibrations", icon: "cpu" }
     ],
     narratives: [
       {
@@ -487,6 +481,55 @@ export const projectDetailsData = {
         paragraphs: [
           "Auditing historical records is made simple with a powerful annual ledger browser. Admin users can filter transactions by trust organizations, localized streets, specific payment date ranges, genders, and Hijri calendar years.",
           "To support physical record keeping and distribution, the UI links to a high-performance print engine. Users can generate individual payment receipts or execute bulk-page printing, which automatically formats thousands of ledger items into print-ready, clean A4 PDFs with trust headers."
+        ]
+      }
+    ]
+  },
+  "cgpa": {
+    subtitle: "An intelligent GPA/CGPA calculator and target planner with client-side Tesseract.js OCR marksheet scanning, vector PDF reporting, and a striking Neo-Brutalist UI.",
+    images: Array.from({ length: 9 }, (_, i) => `./project_pictures/cgpa/${i + 1}.png`),
+    metrics: [
+      { value: "Svelte 5", label: "Reactive Engine" },
+      { value: "100% Client", label: "In-Browser OCR Privacy" },
+      { value: "5-Step", label: "Undo Stack (Ctrl+Z)" },
+      { value: "Vector PDF", label: "jsPDF Dynamic Export" }
+    ],
+    techSpecs: [
+      { label: "Frontend Framework", value: "Svelte 5 / Vite" },
+      { label: "OCR Engine", value: "Tesseract.js (Client-Side WASM)" },
+      { label: "Document Export", value: "jsPDF Vector Renderer" },
+      { label: "State & History", value: "Custom Reactive Store (5-Step Undo)" },
+      { label: "Cloud Sync", value: "Firebase Firestore Templates" },
+      { label: "Design System", value: "Neo-Brutalist CSS & Tailwind" }
+    ],
+    architectureTitle: "NeoCGPA Application & Calculation Architecture",
+    architectureNodes: [
+      { title: "1. Svelte 5 UI Engine", desc: "Interactive reactive semester cards", icon: "monitor" },
+      { title: "2. Tesseract.js OCR", desc: "Local transcript & image parsing", icon: "upload-cloud" },
+      { title: "3. Calculation Engine", desc: "Instant SGPA/CGPA math updates", icon: "cpu" },
+      { title: "4. History Undo Stack", desc: "5-step snapshot restoration", icon: "shuffle" },
+      { title: "5. PDF & Cloud Export", desc: "jsPDF reports & Firestore sharing", icon: "download" }
+    ],
+    narratives: [
+      {
+        heading: "The Academic Tracking Challenge & NeoCGPA",
+        paragraphs: [
+          "Calculating semester GPAs, evaluating cumulative performance, and planning ahead for graduation goals is frequently handled through rigid, cumbersome spreadsheets or rudimentary online calculators that demand painstaking manual entry.",
+          "NeoCGPA was architected as a high-performance, client-side web application built with Svelte 5 and styled in an assertive Neo-Brutalist aesthetic. It computes SGPA and CGPA in real-time as users edit grades, complemented by spreadsheet-style keyboard shortcuts (such as Ctrl + Arrow navigation and rapid letter key cycling) for rapid data entry."
+        ]
+      },
+      {
+        heading: "100% Client-Side OCR Marksheet Scanning",
+        paragraphs: [
+          "A standout capability of NeoCGPA is automated marksheet transcript parsing powered by Tesseract.js executing locally in the browser via WebAssembly.",
+          "Students can drag and drop grade cards or transcript screenshots (PNG, JPG, WebP). The engine performs in-browser preprocessing—grayscale thresholding and noise reduction—to extract course codes, titles, credits, and letter grades directly into semester cards. Because no images or academic records leave the device, user privacy is 100% guaranteed."
+        ]
+      },
+      {
+        heading: "Target Goal Planning, Undo Engine, & PDF Export",
+        paragraphs: [
+          "Beyond instant calculations, NeoCGPA features an intelligent Target CGPA Planner. Students input their target cumulative GPA along with the count of remaining semesters; the engine calculates the precise average SGPA required to achieve that target.",
+          "To safeguard against mistakes, a 5-step undo stack (Ctrl + Z) restores previous state modifications across the application. Users can also export comprehensive vector PDF transcripts via jsPDF, generate JSON workspace backups, or sync curriculum templates via Firebase Firestore."
         ]
       }
     ]
