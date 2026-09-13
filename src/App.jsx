@@ -11,6 +11,8 @@ import { Timeline } from './components/Timeline';
 import { Skills } from './components/Skills';
 import { Certificates } from './components/Certificates';
 import { Terminal } from './components/Terminal';
+import { UnifiedBackground } from './components/UnifiedBackground';
+import { ResumeModal } from './components/ResumeModal';
 import { Mail, MapPin, Phone } from 'lucide-react';
 
 const GithubIcon = ({ size = 20 }) => (
@@ -28,6 +30,7 @@ const InstagramIcon = ({ size = 20 }) => (
 export default function App() {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [terminalOpen, setTerminalOpen] = useState(false);
+  const [resumeModalOpen, setResumeModalOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -42,6 +45,30 @@ export default function App() {
   };
 
   const currentView = location.pathname.startsWith('/projects/') ? 'detail' : 'home';
+
+  // Contact form state and mailto submission
+  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+  const [sendState, setSendState] = useState('idle'); // idle | sending | sent
+
+  const handleContactSubmit = (e) => {
+    e.preventDefault();
+    const name = contactForm.name.trim();
+    const email = contactForm.email.trim();
+    const message = contactForm.message.trim();
+
+    setSendState('sending');
+
+    const subject = `Portfolio Inquiry from ${name || 'Website Visitor'}`;
+    const body = `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
+    const mailtoUrl = `mailto:${data.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    setTimeout(() => {
+      window.location.href = mailtoUrl;
+      setSendState('sent');
+      setContactForm({ name: '', email: '', message: '' });
+      setTimeout(() => setSendState('idle'), 3500);
+    }, 600);
+  };
 
   // Handle fake navigation state passed to Navbar component
   const handleNavbarSetView = (viewObj) => {
@@ -62,13 +89,15 @@ export default function App() {
         githubUrl={data.contact.github}
         linkedinUrl={data.contact.linkedin}
         instagramUrl={data.contact.instagram}
+        onViewResume={() => setResumeModalOpen(true)}
       />
 
-      <main className="min-h-[calc(100vh-4.5rem-12rem)]">
+      <main className="min-h-[calc(100vh-4.5rem-12rem)] relative">
+        <UnifiedBackground />
         <Routes>
           <Route path="/" element={
-            <>
-              <section id="hero" className="bg-bg-primary">
+            <div className="relative z-10">
+              <section id="hero">
                 <Hero
                   role={data.role}
                   name={data.name}
@@ -78,10 +107,11 @@ export default function App() {
                   linkedinUrl={data.contact.linkedin}
                   instagramUrl={data.contact.instagram}
                   data={data}
+                  onViewResume={() => setResumeModalOpen(true)}
                 />
               </section>
 
-              <section id="about" className="py-24 border-t border-border-color bg-bg-secondary">
+              <section id="about" className="py-24 border-t border-border-color/50 bg-bg-secondary/40">
                 <About
                   aboutText={data.about}
                   profileImg={data.images.profile}
@@ -89,7 +119,7 @@ export default function App() {
                 />
               </section>
 
-              <section id="projects" className="py-24 border-t border-border-color bg-bg-tertiary">
+              <section id="projects" className="py-24 border-t border-border-color/50 bg-bg-tertiary/40">
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                   <Projects
                     projects={data.projects}
@@ -98,7 +128,7 @@ export default function App() {
                 </div>
               </section>
 
-              <section id="education" className="py-24 border-t border-border-color bg-bg-secondary">
+              <section id="education" className="py-24 border-t border-border-color/50 bg-bg-secondary/40">
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                   <Timeline
                     title="Education"
@@ -108,7 +138,7 @@ export default function App() {
                 </div>
               </section>
 
-              <section id="experience" className="py-24 border-t border-border-color bg-bg-tertiary">
+              <section id="experience" className="py-24 border-t border-border-color/50 bg-bg-tertiary/40">
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                   <Timeline
                     title="Experience"
@@ -119,20 +149,20 @@ export default function App() {
               </section>
 
               {data.certificates && data.certificates.length > 0 && (
-                <section id="certificates" className="py-24 border-t border-border-color bg-bg-secondary">
+                <section id="certificates" className="py-24 border-t border-border-color/50 bg-bg-secondary/40">
                   <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                     <Certificates certificates={data.certificates} />
                   </div>
                 </section>
               )}
 
-              <section id="skills" className="py-24 border-t border-border-color bg-bg-tertiary">
+              <section id="skills" className="py-24 border-t border-border-color/50 bg-bg-tertiary/40">
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                   <Skills skills={data.skills} />
                 </div>
               </section>
 
-              <section id="contact" className="py-24 border-t border-border-color bg-bg-secondary">
+              <section id="contact" className="py-24 border-t border-border-color/50 bg-bg-secondary/40">
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
                     <div className="space-y-6 text-left">
@@ -141,10 +171,10 @@ export default function App() {
                         I'm always open to discussing new projects, automation designs, database engineering pipelines, or smart server configurations.
                       </p>
                       <div className="flex flex-col gap-6">
-                        <div className="flex items-center gap-5">
-                          <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary flex-shrink-0"><Mail size={18} /></span>
-                          <span className="text-lg font-medium text-text-primary">{data.contact.email}</span>
-                        </div>
+                        <a href={`mailto:${data.contact.email}`} className="flex items-center gap-5 group text-inherit hover:text-primary transition-colors">
+                          <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary flex-shrink-0 group-hover:scale-110 transition-transform"><Mail size={18} /></span>
+                          <span className="text-lg font-medium text-text-primary group-hover:text-primary transition-colors">{data.contact.email}</span>
+                        </a>
                         <div className="flex items-center gap-5">
                           <span className="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary flex-shrink-0"><Phone size={18} /></span>
                           <span className="text-lg font-medium text-text-primary">{data.contact.phone}</span>
@@ -156,29 +186,73 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="bg-bg-secondary border border-border-color p-10 rounded-3xl shadow-xl">
-                      <form onSubmit={(e) => e.preventDefault()} className="space-y-5 text-left">
+                    <div className="bg-bg-secondary/90 border border-border-color p-10 rounded-3xl shadow-xl">
+                      <form onSubmit={handleContactSubmit} className="space-y-5 text-left">
                         <div className="flex flex-col gap-2">
                           <label htmlFor="name" className="text-sm font-semibold text-text-secondary">Name</label>
-                          <input type="text" id="name" className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="Your Name" required />
+                          <input 
+                            type="text" 
+                            id="name" 
+                            name="name"
+                            value={contactForm.name}
+                            onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                            className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" 
+                            placeholder="Your Name" 
+                            required 
+                          />
                         </div>
                         <div className="flex flex-col gap-2">
                           <label htmlFor="email" className="text-sm font-semibold text-text-secondary">Email</label>
-                          <input type="email" id="email" className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" placeholder="you@example.com" required />
+                          <input 
+                            type="email" 
+                            id="email" 
+                            name="email"
+                            value={contactForm.email}
+                            onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                            className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" 
+                            placeholder="you@example.com" 
+                            required 
+                          />
                         </div>
                         <div className="flex flex-col gap-2">
                           <label htmlFor="message" className="text-sm font-semibold text-text-secondary">Message</label>
-                          <textarea id="message" className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" rows="4" placeholder="Tell me about your project or opportunity..." required></textarea>
+                          <textarea 
+                            id="message" 
+                            name="message"
+                            value={contactForm.message}
+                            onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                            className="w-full p-3 rounded-lg border border-border-color bg-bg-secondary text-text-primary outline-none focus:border-primary focus:ring-2 focus:ring-primary/15 transition-all" 
+                            rows="4" 
+                            placeholder="Tell me about your project or opportunity..." 
+                            required
+                          ></textarea>
                         </div>
-                        <button type="submit" className="w-full mt-2 inline-flex items-center justify-center gap-2 p-3.5 rounded-full font-semibold text-sm cursor-pointer transition-all border-none outline-none bg-primary text-bg-secondary hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30">
-                          Send Message
+                        <button
+                          type="submit"
+                          disabled={sendState !== 'idle'}
+                          className={`w-full mt-2 inline-flex items-center justify-center gap-2 p-3.5 rounded-full font-semibold text-sm cursor-pointer transition-all border-none outline-none
+                            ${sendState === 'sent'
+                              ? 'bg-emerald-500 text-white scale-95'
+                              : sendState === 'sending'
+                              ? 'bg-primary/70 text-bg-secondary cursor-not-allowed'
+                              : 'bg-primary text-bg-secondary hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30'
+                            }`}
+                        >
+                          {sendState === 'sending' && (
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                            </svg>
+                          )}
+                          {sendState === 'sent' && <span>✓</span>}
+                          {sendState === 'sending' ? 'Opening Mail…' : sendState === 'sent' ? 'Mail Client Opened!' : 'Send Message'}
                         </button>
                       </form>
                     </div>
                   </div>
                 </div>
               </section>
-            </>
+            </div>
           } />
           <Route path="/projects/:projectId" element={<ProjectDetailWrapper />} />
         </Routes>
@@ -213,6 +287,13 @@ export default function App() {
         onClose={() => setTerminalOpen(false)}
         data={data}
       />
+
+      <ResumeModal
+        isOpen={resumeModalOpen}
+        onClose={() => setResumeModalOpen(false)}
+        resumeUrl={data.resume}
+        resumeImage={data.images.resume_image}
+      />
     </>
   );
 }
@@ -227,7 +308,7 @@ function ProjectDetailWrapper() {
 
   if (!currentProject || !currentProjectDetails) {
     return (
-      <div className="py-32 text-center text-text-primary text-xl">
+      <div className="py-32 text-center text-text-primary text-xl relative z-10">
         <p className="mb-4">Project not found.</p>
         <button onClick={() => navigate('/')} className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-sm cursor-pointer transition-all border-none bg-primary text-bg-secondary hover:bg-primary-hover">
           Back to Home

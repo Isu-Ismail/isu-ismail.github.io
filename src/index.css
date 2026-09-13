@@ -26,6 +26,8 @@
 
   --animate-glow-pulse: glow-pulse 2s infinite ease-in-out;
   --animate-fade-in: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  --animate-float-slow: floatSlow 20s ease-in-out infinite;
+  --animate-float-reverse: floatReverse 24s ease-in-out infinite;
 
   @keyframes glow-pulse {
 
@@ -52,6 +54,24 @@
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes floatSlow {
+    0%, 100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(20px, -16px, 0);
+    }
+  }
+
+  @keyframes floatReverse {
+    0%, 100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(-16px, 16px, 0);
     }
   }
 }
@@ -120,8 +140,8 @@
 
 
 html {
-  scroll-behavior: smooth;
   font-size: 17.6px;
+  overflow-x: clip;
 }
 
 body {
@@ -129,9 +149,16 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
-  transition: background-color var(--transition-normal), color var(--transition-normal);
-  overflow-x: hidden;
+  overflow-x: clip;
+  overscroll-behavior-y: none;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Skip painting off-screen sections — biggest scroll perf win */
+section {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 600px;
 }
 
 
@@ -154,3 +181,42 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* High-performance, Hardware-Accelerated Ambient Background Textures */
+.ambient-bg-layer {
+  contain: paint;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.bg-grid-subtle {
+  background-size: 36px 36px;
+  background-image: 
+    linear-gradient(to right, rgba(var(--primary-rgb), 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--primary-rgb), 0.08) 1px, transparent 1px);
+}
+
+.bg-dots-subtle {
+  background-size: 24px 24px;
+  background-image: radial-gradient(rgba(var(--primary-rgb), 0.14) 1.3px, transparent 1.3px);
+}
+
+/* Zero-blur, Zero-lag Radial Glow Orbs (Pure Hardware-Composited Gradients) */
+.glow-orb-primary {
+  background: radial-gradient(circle at center, rgba(var(--primary-rgb), 0.22) 0%, rgba(var(--primary-rgb), 0.07) 45%, transparent 72%);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.glow-orb-soft {
+  background: radial-gradient(circle at center, rgba(var(--primary-rgb), 0.14) 0%, rgba(var(--primary-rgb), 0.04) 50%, transparent 75%);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.glow-orb-accent {
+  background: radial-gradient(circle at center, rgba(var(--primary-rgb), 0.25) 0%, rgba(var(--primary-rgb), 0.08) 40%, transparent 70%);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}

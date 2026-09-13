@@ -9,7 +9,8 @@ export const data = {
   ],
   images: {
     profile: "./assets/me.jpeg",
-    hero: "./assets/hero.jpeg"
+    hero: "./assets/hero.jpeg",
+    resume_image: "./assets/resume.jpg"
   },
   contact: {
     email: "ismailisims1@gmail.com",
@@ -25,7 +26,7 @@ export const data = {
       degree: "B.E. Production Engineering",
       institution: "Madras Institute of Technology",
       period: "Aug 2023 - 2027",
-      description: "CGPA: 7.74/10. Currently in IV Year."
+      description: "Currently in IV Year."
     },
     {
       degree: "Higher Secondary (HSC)",
@@ -54,21 +55,21 @@ export const data = {
   ],
   interests: ["3D Printing", "Home Server Administration", "Karting", "Tech Exploration"],
   certificates: [
-    {
-      title: "RUSA 2.0 AI in Smart BMS",
-      image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
-      desc: "Hands-on training on AI applications in Smart Battery Management Systems."
-    },
+    // {
+    //   title: "RUSA 2.0 AI in Smart BMS",
+    //   image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+    //   desc: "Hands-on training on AI applications in Smart Battery Management Systems."
+    // },
     {
       title: "Arduino Bootcamp",
       image: "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=800&q=80",
       desc: "Comprehensive bootcamp on microcontroller programming and hardware interaction."
     },
-    {
-      title: "Python for Data Science",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
-      desc: "Foundational course on Python libraries including Pandas and NumPy by IBM."
-    }
+    // {
+    //   title: "Python for Data Science",
+    //   image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
+    //   desc: "Foundational course on Python libraries including Pandas and NumPy by IBM."
+    // }
   ],
   projects: [
 

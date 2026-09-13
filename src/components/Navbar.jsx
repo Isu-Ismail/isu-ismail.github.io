@@ -13,15 +13,23 @@ const InstagramIcon = ({ size = 18 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
 );
 
-export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, setView, resumeUrl, githubUrl, linkedinUrl, instagramUrl }) => {
+export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, setView, resumeUrl, githubUrl, linkedinUrl, instagramUrl, onViewResume }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const isScrolled = window.scrollY > 20;
+          setScrolled((prev) => (prev !== isScrolled ? isScrolled : prev));
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -55,7 +63,10 @@ export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, setVie
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-all duration-300 border-b border-transparent ${scrolled ? 'bg-bg-secondary/70 backdrop-blur-md border-border-color shadow-sm' : ''}`}>
+      <nav 
+        className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-all duration-300 border-b border-transparent ${scrolled ? 'bg-bg-secondary/80 backdrop-blur-md border-border-color shadow-sm' : ''}`}
+        style={{ transform: 'translateZ(0)' }}
+      >
         <div className="max-w-7xl mx-auto px-6 w-full flex justify-between items-center">
           <a href="#" className="font-heading text-2xl font-extrabold tracking-tight flex items-center text-text-primary" onClick={(e) => handleNavClick(e, 'hero')}>
             Ismail<span className="text-primary">.</span>
@@ -75,9 +86,9 @@ export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, setVie
           </div>
 
           <div className="flex items-center gap-3">
-            <a href={resumeUrl} download className="hidden sm:inline-flex items-center justify-center px-5 py-2 border border-border-color bg-bg-secondary text-text-primary hover:text-primary hover:border-primary rounded-full text-sm font-semibold transition-all duration-200 shadow-sm">
+            <button onClick={onViewResume} className="hidden sm:inline-flex items-center justify-center px-5 py-2 border border-border-color bg-bg-secondary text-text-primary hover:text-primary hover:border-primary rounded-full text-sm font-semibold transition-all duration-200 shadow-sm cursor-pointer">
               Resume
-            </a>
+            </button>
 
             <button onClick={toggleTerminal} className="flex items-center justify-center w-10 h-10 rounded-full border border-border-color bg-bg-secondary text-text-primary hover:text-primary hover:border-primary transition-all duration-200 cursor-pointer shadow-sm" title="Open Terminal">
               <Terminal size={18} />
@@ -117,9 +128,9 @@ export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, setVie
               {link.label}
             </a>
           ))}
-          <a href={resumeUrl} download className="text-lg font-bold text-primary hover:underline">
-            Download Resume
-          </a>
+          <button onClick={() => { setMobileMenuOpen(false); onViewResume?.(); }} className="text-lg font-bold text-primary hover:underline text-left cursor-pointer bg-transparent border-none outline-none">
+            View Resume
+          </button>
         </div>
 
         <div className="h-[1px] bg-border-color w-full" />
