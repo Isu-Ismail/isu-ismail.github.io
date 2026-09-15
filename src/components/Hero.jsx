@@ -113,7 +113,7 @@ export const Hero = ({ role, name, about, resumeUrl, githubUrl, linkedinUrl, ins
           <span className="text-primary">{nameParts.slice(-2).join(" ")}</span>
         </h1>
         <p className="text-lg text-text-secondary leading-relaxed">
-          Engineer focused on building clean, modular software systems, secure local-first cloud containers, and real-time automation.
+          {data?.hero_about}
         </p>
 
         <div className="flex gap-4 flex-wrap items-center">

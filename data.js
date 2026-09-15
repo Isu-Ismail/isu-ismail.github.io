@@ -20,7 +20,8 @@ export const data = {
     linkedin: "https://www.linkedin.com/in/ismail-am",
     instagram: "https://www.instagram.com/ismail_isims"
   },
-  about: "Engineering student specializing in industrial automation and distributed systems. I bridge mechanical engineering fundamentals with software architecture—designing IoT control systems, deploying multi-node compute infrastructure, and building production-grade automation for real industrial environments. My background gives me a solid grasp of physical machinery, while my focus remains on mapping logical data flows and designing the software systems that run them. Proven track record of delivering reliable systems that run 24/7 in manufacturing and academic settings.",
+  about: "Engineering student driven by practical problem-solving, continuous process improvement, and rapid learning agility. Experienced in applying engineering fundamentals to solve shop-floor bottlenecks, optimize workflows, and deploy cost-effective automated solutions that deliver measurable productivity gains. Demonstrated track record of collaborating across multidisciplinary teams, with exceptional adaptability to quickly master new processes, tools, and technical domains.",
+  hero_about: "Engineer driven by practical problem-solving and continuous process improvement — applying engineering fundamentals to optimize workflows and deliver measurable results across real industrial environments.",
   education: [
     {
       degree: "B.E. Production Engineering",
@@ -47,7 +48,7 @@ export const data = {
       role: "Chassis Design & Maintenance",
       company: "MITONAUR Motorsports (Go-Kart Team)",
       period: "Dec 2024 - 2025",
-      description: "Structured structural simulations and engineering parameters on racing frames designed for the TNKC and KEC championships."
+      description: "Assisted in the design and assembly of structural members on racing go-kart frames for the TNKC and KEC championships."
     }
   ],
   skills: [
@@ -55,21 +56,16 @@ export const data = {
   ],
   interests: ["3D Printing", "Home Server Administration", "Karting", "Tech Exploration"],
   certificates: [
-    // {
-    //   title: "RUSA 2.0 AI in Smart BMS",
-    //   image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
-    //   desc: "Hands-on training on AI applications in Smart Battery Management Systems."
-    // },
     {
-      title: "Arduino Bootcamp",
-      image: "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=800&q=80",
-      desc: "Comprehensive bootcamp on microcontroller programming and hardware interaction."
+      title: "Manufacturing Strategy",
+      image: "./assets/certificates/manufacturing-strategy.jpg",
+      desc: "NPTEL Elite Certification by IIT Roorkee. Covered manufacturing planning, competitive strategy, and operational decision-making frameworks. Score: 66% (Jul–Sep 2025)."
     },
-    // {
-    //   title: "Python for Data Science",
-    //   image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
-    //   desc: "Foundational course on Python libraries including Pandas and NumPy by IBM."
-    // }
+    {
+      title: "Navigating the Latest Trends in Additive Manufacturing Landscape",
+      image: "./assets/certificates/latest-trends-additive.jpg",
+      desc: "NPTEL Elite Certification by IIT Bombay. Explored current advancements and industry applications in additive manufacturing and 3D printing technologies. Score: 80% (Feb–Mar 2026)."
+    }
   ],
   projects: [
 

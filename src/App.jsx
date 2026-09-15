@@ -46,28 +46,37 @@ export default function App() {
 
   const currentView = location.pathname.startsWith('/projects/') ? 'detail' : 'home';
 
-  // Contact form state and mailto submission
+  // Contact form state and Formspree submission
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
-  const [sendState, setSendState] = useState('idle'); // idle | sending | sent
+  const [sendState, setSendState] = useState('idle'); // idle | sending | sent | error
 
-  const handleContactSubmit = (e) => {
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
-    const name = contactForm.name.trim();
-    const email = contactForm.email.trim();
-    const message = contactForm.message.trim();
-
     setSendState('sending');
 
-    const subject = `Portfolio Inquiry from ${name || 'Website Visitor'}`;
-    const body = `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
-    const mailtoUrl = `mailto:${data.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    try {
+      const res = await fetch('https://formspree.io/f/mkjndljz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          name: contactForm.name.trim(),
+          email: contactForm.email.trim(),
+          message: contactForm.message.trim(),
+        }),
+      });
 
-    setTimeout(() => {
-      window.location.href = mailtoUrl;
-      setSendState('sent');
-      setContactForm({ name: '', email: '', message: '' });
-      setTimeout(() => setSendState('idle'), 3500);
-    }, 600);
+      if (res.ok) {
+        setSendState('sent');
+        setContactForm({ name: '', email: '', message: '' });
+        setTimeout(() => setSendState('idle'), 4000);
+      } else {
+        setSendState('error');
+        setTimeout(() => setSendState('idle'), 4000);
+      }
+    } catch {
+      setSendState('error');
+      setTimeout(() => setSendState('idle'), 4000);
+    }
   };
 
   // Handle fake navigation state passed to Navbar component
@@ -233,6 +242,8 @@ export default function App() {
                           className={`w-full mt-2 inline-flex items-center justify-center gap-2 p-3.5 rounded-full font-semibold text-sm cursor-pointer transition-all border-none outline-none
                             ${sendState === 'sent'
                               ? 'bg-emerald-500 text-white scale-95'
+                              : sendState === 'error'
+                              ? 'bg-red-500 text-white scale-95'
                               : sendState === 'sending'
                               ? 'bg-primary/70 text-bg-secondary cursor-not-allowed'
                               : 'bg-primary text-bg-secondary hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/30'
@@ -245,7 +256,8 @@ export default function App() {
                             </svg>
                           )}
                           {sendState === 'sent' && <span>✓</span>}
-                          {sendState === 'sending' ? 'Opening Mail…' : sendState === 'sent' ? 'Mail Client Opened!' : 'Send Message'}
+                          {sendState === 'error' && <span>✕</span>}
+                          {sendState === 'sending' ? 'Sending…' : sendState === 'sent' ? 'Message Sent!' : sendState === 'error' ? 'Failed — Try Again' : 'Send Message'}
                         </button>
                       </form>
                     </div>
