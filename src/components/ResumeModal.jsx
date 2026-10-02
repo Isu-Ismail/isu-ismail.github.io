@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Download, FileText, Loader } from 'lucide-react';
 
 const CACHE_KEY = 'resume_image_b64';
@@ -16,8 +16,9 @@ function useLocalStorageImage(url) {
   useEffect(() => {
     if (!url || src) return; // already cached — skip fetch entirely
 
+    // `loading` already starts true whenever `src` is falsy (the only time
+    // this effect body runs past the guard above), so no setState needed here.
     let cancelled = false;
-    setLoading(true);
 
     fetch(url)
       .then((res) => res.blob())

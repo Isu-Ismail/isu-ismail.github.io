@@ -18,9 +18,15 @@ port/
 ├── data.js                 # site owner's bio/contact/education/experience content
 ├── src/
 │   ├── App.jsx              # routes: "/" (home) and "/projects/:projectId" (detail pages)
-│   ├── projectDetailsData.js  # per-project detail content, keyed by project id
+│   ├── projectDetailsData.js  # per-project detail content, keyed by project id (static fallback)
+│   ├── firebase.js          # lazy Firestore client, gated on VITE_FIREBASE_* env vars
+│   ├── api/                 # about.js, projects.js — Firestore reads with data.js fallback
+│   ├── hooks/                # useAboutMe, useProjects, useProjectDetails
 │   └── components/          # Hero, Projects, About, Skills, Timeline, Certificates,
 │                             # ProjectDetail, Navbar, Terminal, ResumeModal, backgrounds
+├── admin/                  # local-only static admin panel (writes to Firestore/Storage
+│                            # directly) — see admin/README.md; not part of the Vite build
+├── scripts/seed-firestore.mjs  # pushes data.js + projectDetailsData.js into Firestore once
 ├── public/                 # static assets copied as-is into the build (robots.txt,
 │                            # sitemap.xml, og-image.png, favicon.svg, 404.html)
 ├── project_pictures/       # per-project screenshot folders, referenced by projectDetailsData.js

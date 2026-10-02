@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { X, Square, Minus } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 
 export const Terminal = ({ isOpen, onClose, data }) => {
-  if (!isOpen) return null;
-
+  // Hooks must run unconditionally on every render (Rules of Hooks) — the
+  // `isOpen` guard lives below, after all hooks.
   const [inputVal, setInputVal] = useState('');
   const [history, setHistory] = useState([
     { type: 'system', text: "Welcome to Terminal Mode." },
@@ -25,12 +24,14 @@ export const Terminal = ({ isOpen, onClose, data }) => {
     }
   }, [history]);
 
+  if (!isOpen) return null;
+
   const handleCommand = (cmdStr) => {
     const trimmed = cmdStr.trim();
     if (!trimmed) return;
 
     const cmd = trimmed.toLowerCase();
-    let response = '';
+    let response;
     const newHistory = [...history, { type: 'input', text: trimmed }];
 
     switch (cmd) {
@@ -41,22 +42,23 @@ export const Terminal = ({ isOpen, onClose, data }) => {
         response = data.about;
         break;
       case 'experience':
-        response = data.experience.map(exp => 
+        response = data.experience.map(exp =>
           `[${exp.period}] ${exp.role} @ ${exp.company}\n  ↳ ${exp.description || 'No description provided'}`
         ).join('\n\n');
         break;
       case 'education':
-        response = data.education.map(edu => 
+        response = data.education.map(edu =>
           `[${edu.period}] ${edu.degree}\n  ↳ ${edu.institution} (${edu.description || ''})`
         ).join('\n\n');
         break;
-      case 'projects':
+      case 'projects': {
         const sortedProj = [...data.projects].sort((a, b) => (b.stars || 0) - (a.stars || 0));
         response = sortedProj.map(p => {
           const rating = p.stars ? ` [Rating: ${p.stars}/5]` : '';
           return `★ ${p.title} (${p.status || 'Completed'})${rating}\n  - Tags: ${p.tags.join(', ')}\n  - ${p.description}`;
         }).join('\n\n');
         break;
+      }
       case 'skills':
         response = `Technical Stack:\n  • ` + data.skills.join('\n  • ');
         break;

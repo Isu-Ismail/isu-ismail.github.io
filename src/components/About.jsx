@@ -1,4 +1,3 @@
-import React from 'react';
 import { resolveAssetPath } from '../utils';
 
 export const About = ({ aboutText, profileImg, projectsCount }) => {

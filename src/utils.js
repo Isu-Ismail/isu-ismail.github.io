@@ -20,3 +20,18 @@ export const resolveAssetPath = (path) => {
   const cleanBase = base.endsWith('/') ? base : `${base}/`;
   return `${cleanBase}${cleanPath}`;
 };
+
+export const slugifyTitle = (title) =>
+  title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+// Derives the stable id used as both the /projects/:id route param and the
+// Firestore projects/{id} document id. Projects with a detailsLink keep their
+// existing alias (e.g. "./project_details/ctskii.html" -> "ctskii") so
+// existing URLs and the seeded Firestore doc ids line up; projects without
+// one (no case-study page) fall back to a slug of the title.
+export const getProjectId = (project) => {
+  if (project.detailsLink) {
+    return project.detailsLink.split('/').pop().replace('.html', '');
+  }
+  return slugifyTitle(project.title);
+};

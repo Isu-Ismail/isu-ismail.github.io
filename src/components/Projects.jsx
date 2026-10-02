@@ -1,12 +1,36 @@
-import React from 'react';
 import { ArrowUpRight, Calendar, Star } from 'lucide-react';
 
-export const Projects = ({ projects, onSelectProject }) => {
+const SKELETON_COUNT = 6;
+
+const ProjectCardSkeleton = () => (
+  <div className="bg-bg-secondary border border-border-color rounded-2xl p-8 h-full animate-pulse">
+    <div className="flex justify-between items-start gap-4 mb-3">
+      <div className="h-5 w-2/3 bg-bg-tertiary rounded" />
+      <div className="h-5 w-5 bg-bg-tertiary rounded" />
+    </div>
+    <div className="flex gap-2 mb-4">
+      <div className="h-4 w-16 bg-bg-tertiary rounded" />
+      <div className="h-4 w-24 bg-bg-tertiary rounded" />
+    </div>
+    <div className="space-y-2 mb-6">
+      <div className="h-3 w-full bg-bg-tertiary rounded" />
+      <div className="h-3 w-5/6 bg-bg-tertiary rounded" />
+      <div className="h-3 w-3/4 bg-bg-tertiary rounded" />
+    </div>
+    <div className="flex gap-1.5">
+      <div className="h-4 w-14 bg-bg-tertiary rounded" />
+      <div className="h-4 w-14 bg-bg-tertiary rounded" />
+      <div className="h-4 w-14 bg-bg-tertiary rounded" />
+    </div>
+  </div>
+);
+
+export const Projects = ({ projects, loading, onSelectProject }) => {
   const sortedProjects = [...projects].sort((a, b) => (b.stars || 0) - (a.stars || 0));
 
-  const getProjectAlias = (detailsLink) => {
-    if (!detailsLink) return null;
-    return detailsLink.split('/').pop().replace('.html', '');
+  const getProjectAlias = (project) => {
+    if (!project.detailsLink) return null;
+    return project.id || project.detailsLink.split('/').pop().replace('.html', '');
   };
 
   const renderStars = (stars) => {
@@ -33,8 +57,12 @@ export const Projects = ({ projects, onSelectProject }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {sortedProjects.map((project, idx) => {
-          const alias = getProjectAlias(project.detailsLink);
+        {loading && Array.from({ length: SKELETON_COUNT }).map((_, idx) => (
+          <ProjectCardSkeleton key={`skeleton-${idx}`} />
+        ))}
+
+        {!loading && sortedProjects.map((project, idx) => {
+          const alias = getProjectAlias(project);
           
           const handleCardClick = () => {
             if (alias) {

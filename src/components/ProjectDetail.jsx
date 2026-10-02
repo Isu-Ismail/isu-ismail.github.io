@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import DOMPurify from 'dompurify';
 import { resolveAssetPath } from '../utils';
-import { 
+import {
   ArrowLeft, ExternalLink, Calendar, GitBranch, Layers, Award,
   ChevronLeft, ChevronRight, X, Terminal, MessageSquare, Cpu, Shuffle, 
   Globe, ShieldCheck, Smartphone, Server, Database, HardDrive, BarChart2,
@@ -31,41 +32,28 @@ const IconMapper = ({ name, size = 18 }) => {
   return icons[name] || <Settings size={size} />;
 };
 
-export const ProjectDetail = ({ project, details, onBack }) => {
-  if (!project || !details) return null;
-
+export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
+  // Hooks must run unconditionally on every render (Rules of Hooks) — the
+  // null-guard for a missing project/details lives below, after all hooks.
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  const images = useMemo(() => details?.images || [], [details?.images]);
+
   // Combine project images and certificate into a single list for lightbox navigation
-  const allMedia = (details.images || []).map(resolveAssetPath);
-  if (details.certificate) {
-    allMedia.push(resolveAssetPath(details.certificate));
-  }
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [project.title]);
-
-  // Handle lightbox keyboard navigation
-  useEffect(() => {
-    if (!lightboxOpen) return;
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') setLightboxOpen(false);
-      if (e.key === 'ArrowRight') handleLightboxNext();
-      if (e.key === 'ArrowLeft') handleLightboxPrev();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [lightboxOpen, lightboxIndex]);
+  const allMedia = useMemo(() => {
+    const media = images.map(resolveAssetPath);
+    if (details?.certificate) media.push(resolveAssetPath(details.certificate));
+    return media;
+  }, [images, details]);
 
   const handleCarouselNext = () => {
-    setCarouselIndex((prev) => (prev === details.images.length - 1 ? 0 : prev + 1));
+    setCarouselIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
   const handleCarouselPrev = () => {
-    setCarouselIndex((prev) => (prev === 0 ? details.images.length - 1 : prev - 1));
+    setCarouselIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   const openLightbox = (index) => {
@@ -80,6 +68,21 @@ export const ProjectDetail = ({ project, details, onBack }) => {
   const handleLightboxPrev = () => {
     setLightboxIndex((prev) => (prev === 0 ? allMedia.length - 1 : prev - 1));
   };
+
+  // Handle lightbox keyboard navigation
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const mediaCount = allMedia.length;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setLightboxOpen(false);
+      if (e.key === 'ArrowRight') setLightboxIndex((prev) => (prev === mediaCount - 1 ? 0 : prev + 1));
+      if (e.key === 'ArrowLeft') setLightboxIndex((prev) => (prev === 0 ? mediaCount - 1 : prev - 1));
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxOpen, allMedia.length]);
+
+  if (!project || !details) return null;
 
   return (
     <div className="max-w-6xl mx-auto px-6 md:px-16 py-24 text-left w-full">
@@ -98,7 +101,7 @@ export const ProjectDetail = ({ project, details, onBack }) => {
       </div>
 
       {/* Hero header */}
-      <header className="mb-12 space-y-4 animate-fade-in">
+      <header className={`mb-12 space-y-4 ${animate ? 'animate-fade-in' : ''}`}>
         <div className="flex justify-between items-start flex-wrap gap-6">
           <div>
             <div className="inline-flex gap-2 mb-3 items-center">
@@ -143,7 +146,7 @@ export const ProjectDetail = ({ project, details, onBack }) => {
       </header>
 
       {/* Metrics Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 animate-fade-in [animation-delay:0.1s]">
+      <section className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 ${animate ? 'animate-fade-in [animation-delay:0.1s]' : ''}`}>
         {details.metrics.map((m, idx) => (
           <div key={idx} className="bg-bg-secondary border border-border-color p-6 rounded-2xl text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-lg">
             <span className="text-3xl font-extrabold text-primary font-heading block mb-1">{m.value}</span>
@@ -154,7 +157,7 @@ export const ProjectDetail = ({ project, details, onBack }) => {
 
       {/* Image Carousel */}
       {details.images && details.images.length > 0 && (
-        <section className="relative rounded-3xl border border-border-color overflow-hidden bg-slate-950 mb-16 shadow-lg animate-fade-in [animation-delay:0.15s]">
+        <section className={`relative rounded-3xl border border-border-color overflow-hidden bg-slate-950 mb-16 shadow-lg ${animate ? 'animate-fade-in [animation-delay:0.15s]' : ''}`}>
           <div className="absolute top-4 right-4 bg-black/70 text-white font-mono text-xs px-2.5 py-1 rounded border border-white/10 z-10">
             {carouselIndex + 1} / {details.images.length}
           </div>
@@ -165,8 +168,12 @@ export const ProjectDetail = ({ project, details, onBack }) => {
           >
             {details.images.map((imgUrl, idx) => (
               <div key={idx} className="min-w-full h-full relative cursor-pointer overflow-hidden flex items-center justify-center" onClick={() => openLightbox(idx)}>
-                <img src={resolveAssetPath(imgUrl)} className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-45 scale-11" alt="" />
-                <img src={resolveAssetPath(imgUrl)} className="relative max-h-full max-w-full object-contain z-10 transition-transform duration-500 hover:scale-[1.01]" alt={`Slide ${idx + 1}`} />
+                {/* Blurred backdrop costs a dedicated GPU layer per image — only
+                    mount it for the active slide instead of all N slides at once. */}
+                {idx === carouselIndex && (
+                  <img src={resolveAssetPath(imgUrl)} className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-45 scale-11 transform-gpu will-change-transform" alt="" />
+                )}
+                <img src={resolveAssetPath(imgUrl)} className="relative max-h-full max-w-full object-contain z-10 transition-transform duration-500 hover:scale-[1.01]" alt={`Slide ${idx + 1}`} loading={idx === 0 ? 'eager' : 'lazy'} />
               </div>
             ))}
           </div>
@@ -192,24 +199,24 @@ export const ProjectDetail = ({ project, details, onBack }) => {
             <div key={idx} className="space-y-4 text-left">
               <h3 className="text-2xl font-bold text-text-primary mb-4 border-l-4 border-primary pl-3">{n.heading}</h3>
               {n.paragraphs && n.paragraphs.map((p, pIdx) => (
-                <p key={pIdx} className="text-text-secondary text-base leading-relaxed text-justify" dangerouslySetInnerHTML={{ __html: p }} />
+                <p key={pIdx} className="text-text-secondary text-base leading-relaxed text-justify" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(p) }} />
               ))}
               {n.bullets && (
                 <ul className="list-none ml-2 space-y-2.5 pb-2">
                   {n.bullets.map((b, bIdx) => (
-                    <li key={bIdx} className="relative pl-6 text-text-secondary text-sm leading-relaxed before:content-['→'] before:absolute before:left-0 before:text-primary before:font-bold" dangerouslySetInnerHTML={{ __html: b }} />
+                    <li key={bIdx} className="relative pl-6 text-text-secondary text-sm leading-relaxed before:content-['→'] before:absolute before:left-0 before:text-primary before:font-bold" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(b) }} />
                   ))}
                 </ul>
               )}
               {n.paragraphsAfter && n.paragraphsAfter.map((p, paIdx) => (
-                <p key={paIdx} className="text-text-secondary text-base leading-relaxed text-justify" dangerouslySetInnerHTML={{ __html: p }} />
+                <p key={paIdx} className="text-text-secondary text-base leading-relaxed text-justify" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(p) }} />
               ))}
             </div>
           ))}
         </div>
 
         {/* Sidebar */}
-        <div className="lg:sticky lg:top-24 space-y-8 w-full">
+        <div className="lg:sticky lg:top-24 space-y-8 w-full transform-gpu">
           {/* Deployment Architecture visual card */}
           {details.architectureNodes && (
             <div className="bg-bg-secondary border border-border-color rounded-2xl p-8 shadow-md text-left">

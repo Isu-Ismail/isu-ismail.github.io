@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, X, Sun, Moon, Terminal } from 'lucide-react';
 
 const GithubIcon = ({ size = 18 }) => (
@@ -13,7 +13,7 @@ const InstagramIcon = ({ size = 18 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
 );
 
-export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, setView, resumeUrl, githubUrl, linkedinUrl, instagramUrl, onViewResume }) => {
+export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, githubUrl, linkedinUrl, instagramUrl, onViewResume }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -37,7 +37,7 @@ export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, setVie
     e.preventDefault();
     setMobileMenuOpen(false);
     if (currentView !== 'home') {
-      const base = window.location.pathname.replace(/\/(projects|project)\/[^\/]+$/, '');
+      const base = window.location.pathname.replace(/\/(projects|project)\/[^/]+$/, '');
       const newPath = base === '' ? '/' : base;
       window.history.pushState(null, '', newPath);
       window.dispatchEvent(new Event('popstate'));
@@ -64,7 +64,7 @@ export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, setVie
   return (
     <>
       <nav 
-        className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-all duration-300 border-b border-transparent ${scrolled ? 'bg-bg-secondary/80 backdrop-blur-md border-border-color shadow-sm' : ''}`}
+        className={`fixed top-0 left-0 right-0 z-50 h-16 flex items-center transition-colors duration-300 border-b border-transparent ${scrolled ? 'bg-bg-secondary border-border-color shadow-sm' : ''}`}
         style={{ transform: 'translateZ(0)' }}
       >
         <div className="max-w-7xl mx-auto px-6 w-full flex justify-between items-center">

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Manage Projects</title>
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand">Portfolio Admin</span>
+    <nav>
+      <a href="index.html">Dashboard</a>
+      <a href="about.html">About Me</a>
+      <a href="projects.html">Projects</a>
+      <button id="logout-btn">Sign Out</button>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Projects</h1>
+    <p class="muted">Each project is Firestore doc <code class="hint">projects/{id}</code>. <code class="hint">id</code> is also the public URL: <code class="hint">/projects/{id}</code> — keep it lowercase/hyphenated and don't change it after publishing (it'll break the live URL).</p>
+
+    <div class="card">
+      <div class="row between">
+        <h2 style="margin:0;border:none;padding:0">All Projects</h2>
+        <button class="primary" id="new-btn">+ New Project</button>
+      </div>
+      <div class="project-list" id="project-list" style="margin-top:1rem"></div>
+    </div>
+
+    <form id="project-form" class="card" hidden>
+      <h2 style="margin-top:0" id="form-title">New Project</h2>
+
+      <label for="id">id (doc id / URL slug)</label>
+      <input type="text" id="id" placeholder="e.g. ctskii" />
+
+      <label for="title">Title</label>
+      <input type="text" id="title" />
+      <label for="description">Description (card summary)</label>
+      <textarea id="description"></textarea>
+      <label for="tags">Tags — comma-separated</label>
+      <input type="text" id="tags" placeholder="React, Docker, NGINX" />
+      <div class="row">
+        <div style="flex:1">
+          <label for="link">Live/repo link</label>
+          <input type="text" id="link" />
+        </div>
+        <div style="flex:1">
+          <label for="status">Status</label>
+          <input type="text" id="status" placeholder="Completed" />
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label for="duration">Duration</label>
+          <input type="text" id="duration" placeholder="Jan 2026 – Mar 2026" />
+        </div>
+        <div style="flex:1">
+          <label for="stars">Stars (1-5)</label>
+          <input type="number" id="stars" min="1" max="5" />
+        </div>
+      </div>
+
+      <h2>Case Study Page</h2>
+      <label for="subtitle">Subtitle</label>
+      <input type="text" id="subtitle" />
+      <label for="architectureTitle">Architecture card title (optional)</label>
+      <input type="text" id="architectureTitle" placeholder="Deployment Architecture" />
+
+      <label for="metrics">metrics — <code class="hint">[{"value":"99.9%","label":"Uptime"}]</code></label>
+      <textarea id="metrics" class="json"></textarea>
+      <label for="techSpecs">techSpecs — <code class="hint">[{"label":"Backend","value":"FastAPI"}]</code></label>
+      <textarea id="techSpecs" class="json"></textarea>
+      <label for="architectureNodes">architectureNodes — <code class="hint">[{"icon":"server","title":"...","desc":"..."}]</code></label>
+      <textarea id="architectureNodes" class="json"></textarea>
+      <label for="narratives">narratives — <code class="hint">[{"heading":"...","paragraphs":["..."],"bullets":["..."]}]</code></label>
+      <textarea id="narratives" class="json"></textarea>
+
+      <h2>Images</h2>
+      <p class="muted">Upload screenshots for the case-study carousel. Uploaded files go to Firebase Storage under <code class="hint">projects/{id}/</code>.</p>
+      <div class="thumb-grid" id="image-thumbs"></div>
+      <div class="row" style="margin-top:0.75rem">
+        <input type="file" id="image-upload" accept="image/*" multiple />
+        <span class="status" id="upload-status"></span>
+      </div>
+
+      <label style="margin-top:1.5rem">Certificate image (optional — shown as "Verified Credential" badge)</label>
+      <div class="thumb-grid" id="certificate-thumb"></div>
+      <div class="row" style="margin-top:0.5rem">
+        <input type="file" id="certificate-upload" accept="image/*" />
+      </div>
+
+      <div class="row end" style="margin-top:1.5rem">
+        <p class="status" id="status" style="margin-right:auto"></p>
+        <button type="button" id="delete-btn" class="danger" hidden>Delete Project</button>
+        <button type="button" id="cancel-btn">Cancel</button>
+        <button type="submit" class="primary" id="save-btn">Save Project</button>
+      </div>
+    </form>
+  </main>
+
+  <script type="module">
+    import { requireAuth, logout } from "./js/auth.js";
+    import {
+      listProjects, getProject, saveProject, deleteProject,
+      uploadProjectImage, deleteProjectImage,
+    } from "./js/projects-api.js";
+
+    requireAuth(() => {});
+    document.getElementById("logout-btn").addEventListener("click", logout);
+
+    const $ = (id) => document.getElementById(id);
+    const statusEl = $("status");
+    const form = $("project-form");
+    let images = [];
+    let certificate = "";
+    let editingId = null; // null while creating, the original id once loaded for edit
+
+    function setStatus(text, isErr) {
+      statusEl.textContent = text;
+      statusEl.className = `status ${isErr ? "err" : "ok"}`;
+    }
+
+    function renderThumbs() {
+      $("image-thumbs").innerHTML = images
+        .map((url, i) => `<div><img src="${url}" /><br/><button type="button" data-remove-img="${i}" style="margin-top:4px">Remove</button></div>`)
+        .join("");
+      $("certificate-thumb").innerHTML = certificate
+        ? `<div><img src="${certificate}" /><br/><button type="button" id="remove-cert" style="margin-top:4px">Remove</button></div>`
+        : "";
+
+      $("image-thumbs").querySelectorAll("[data-remove-img]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const i = Number(btn.dataset.removeImg);
+          await deleteProjectImage(images[i]);
+          images.splice(i, 1);
+          renderThumbs();
+        });
+      });
+      const removeCertBtn = document.getElementById("remove-cert");
+      if (removeCertBtn) {
+        removeCertBtn.addEventListener("click", async () => {
+          await deleteProjectImage(certificate);
+          certificate = "";
+          renderThumbs();
+        });
+      }
+    }
+
+    function parseJsonField(id) {
+      const raw = $(id).value.trim();
+      if (!raw) return undefined;
+      try {
+        return JSON.parse(raw);
+      } catch {
+        throw new Error(`"${id}" is not valid JSON.`);
+      }
+    }
+
+    function clearForm() {
+      form.reset();
+      images = [];
+      certificate = "";
+      renderThumbs();
+      editingId = null;
+      $("id").disabled = false;
+      $("delete-btn").hidden = true;
+      $("form-title").textContent = "New Project";
+      setStatus("", false);
+    }
+
+    function fillForm(p) {
+      editingId = p.id;
+      $("id").value = p.id;
+      $("id").disabled = true; // doc id is the live URL — don't allow silent breakage
+      $("title").value = p.title || "";
+      $("description").value = p.description || "";
+      $("tags").value = (p.tags || []).join(", ");
+      $("link").value = p.link || "";
+      $("status").value = p.status || "";
+      $("duration").value = p.duration || "";
+      $("stars").value = p.stars || "";
+      $("subtitle").value = p.subtitle || "";
+      $("architectureTitle").value = p.architectureTitle || "";
+      $("metrics").value = JSON.stringify(p.metrics || [], null, 2);
+      $("techSpecs").value = JSON.stringify(p.techSpecs || [], null, 2);
+      $("architectureNodes").value = JSON.stringify(p.architectureNodes || [], null, 2);
+      $("narratives").value = JSON.stringify(p.narratives || [], null, 2);
+      images = p.images || [];
+      certificate = p.certificate || "";
+      renderThumbs();
+      $("delete-btn").hidden = false;
+      $("form-title").textContent = `Edit: ${p.title || p.id}`;
+      form.hidden = false;
+      form.scrollIntoView({ behavior: "smooth" });
+    }
+
+    async function refreshList() {
+      const projects = await listProjects();
+      $("project-list").innerHTML = projects
+        .map((p) => `
+          <div class="project-item">
+            <div>
+              <strong>${p.title || p.id}</strong>
+              <div class="meta">id: ${p.id} · ${p.status || ""} ${p.duration ? "· " + p.duration : ""}</div>
+            </div>
+            <button type="button" data-edit="${p.id}">Edit</button>
+          </div>
+        `)
+        .join("") || `<p class="muted">No projects yet.</p>`;
+
+      $("project-list").querySelectorAll("[data-edit]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const p = await getProject(btn.dataset.edit);
+          if (p) fillForm(p);
+        });
+      });
+    }
+
+    $("new-btn").addEventListener("click", () => {
+      clearForm();
+      form.hidden = false;
+      form.scrollIntoView({ behavior: "smooth" });
+    });
+
+    $("cancel-btn").addEventListener("click", () => {
+      clearForm();
+      form.hidden = true;
+    });
+
+    $("delete-btn").addEventListener("click", async () => {
+      if (!editingId) return;
+      if (!confirm(`Delete project "${editingId}"? This cannot be undone.`)) return;
+      await deleteProject(editingId);
+      clearForm();
+      form.hidden = true;
+      await refreshList();
+    });
+
+    $("image-upload").addEventListener("change", async (e) => {
+      const files = Array.from(e.target.files || []);
+      if (files.length === 0) return;
+      const id = $("id").value.trim();
+      if (!id) {
+        alert("Set the project id first, then upload images.");
+        e.target.value = "";
+        return;
+      }
+      $("upload-status").textContent = `Uploading ${files.length} file(s)…`;
+      for (const file of files) {
+        const url = await uploadProjectImage(id, file);
+        images.push(url);
+      }
+      $("upload-status").textContent = "Upload complete.";
+      renderThumbs();
+      e.target.value = "";
+    });
+
+    $("certificate-upload").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const id = $("id").value.trim();
+      if (!id) {
+        alert("Set the project id first, then upload the certificate.");
+        e.target.value = "";
+        return;
+      }
+      certificate = await uploadProjectImage(id, file);
+      renderThumbs();
+      e.target.value = "";
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const saveBtn = $("save-btn");
+      try {
+        const id = $("id").value.trim();
+        if (!id) throw new Error("id is required.");
+        if (!/^[a-z0-9-]+$/.test(id)) throw new Error("id must be lowercase letters, numbers, and hyphens only.");
+
+        const payload = {
+          title: $("title").value,
+          description: $("description").value,
+          tags: $("tags").value.split(",").map((t) => t.trim()).filter(Boolean),
+          link: $("link").value,
+          detailsLink: `./project_details/${id}.html`,
+          status: $("status").value,
+          duration: $("duration").value,
+          stars: Number($("stars").value) || 0,
+          subtitle: $("subtitle").value,
+          architectureTitle: $("architectureTitle").value || undefined,
+          metrics: parseJsonField("metrics") || [],
+          techSpecs: parseJsonField("techSpecs") || [],
+          architectureNodes: parseJsonField("architectureNodes") || [],
+          narratives: parseJsonField("narratives") || [],
+          images,
+          certificate: certificate || undefined,
+        };
+
+        saveBtn.disabled = true;
+        setStatus("Saving…", false);
+        await saveProject(id, payload);
+        setStatus("Saved.", false);
+        await refreshList();
+      } catch (err) {
+        setStatus(err.message || "Save failed.", true);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    refreshList();
+  </script>
+</body>
+</html>

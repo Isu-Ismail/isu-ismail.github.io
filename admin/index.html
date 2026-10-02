@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Portfolio Admin</title>
+<link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand">Portfolio Admin</span>
+    <nav>
+      <a href="index.html">Dashboard</a>
+      <a href="about.html">About Me</a>
+      <a href="projects.html">Projects</a>
+      <button id="logout-btn">Sign Out</button>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Dashboard</h1>
+    <p class="muted">Signed in as <span id="user-email"></span>. Edits here write directly to Firestore/Storage and go live on the public site immediately (no review step).</p>
+
+    <div class="card">
+      <h2 style="margin-top:0">About Me</h2>
+      <p class="muted">Bio, contact info, education, experience, skills, certificates.</p>
+      <a href="about.html"><button>Edit About Me →</button></a>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">Projects</h2>
+      <p class="muted">Add, edit, or remove project cards and case-study pages, including image uploads.</p>
+      <a href="projects.html"><button>Manage Projects →</button></a>
+    </div>
+  </main>
+
+  <script type="module">
+    import { requireAuth, logout } from "./js/auth.js";
+
+    requireAuth((user) => {
+      document.getElementById("user-email").textContent = user.email;
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", logout);
+  </script>
+</body>
+</html>

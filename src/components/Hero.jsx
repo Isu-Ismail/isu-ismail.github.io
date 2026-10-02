@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Eye } from 'lucide-react';
 
 const GithubIcon = ({ size = 20 }) => (
@@ -13,7 +13,7 @@ const InstagramIcon = ({ size = 20 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
 );
 
-export const Hero = ({ role, name, about, resumeUrl, githubUrl, linkedinUrl, instagramUrl, data, onViewResume }) => {
+export const Hero = ({ role, name, githubUrl, linkedinUrl, instagramUrl, data, onViewResume }) => {
   // Resolve social URLs
   const resolvedGithub = githubUrl || data?.contact?.github;
   const resolvedLinkedin = linkedinUrl || data?.contact?.linkedin;
@@ -53,7 +53,7 @@ export const Hero = ({ role, name, about, resumeUrl, githubUrl, linkedinUrl, ins
     if (!trimmed) return;
 
     const cmd = trimmed.toLowerCase();
-    let response = '';
+    let response;
     const newHistory = [...terminalHistory, { type: 'input', text: trimmed }];
 
     switch (cmd) {
@@ -73,13 +73,14 @@ export const Hero = ({ role, name, about, resumeUrl, githubUrl, linkedinUrl, ins
           `[${edu.period}] ${edu.degree}\n  ↳ ${edu.institution} (${edu.description || ''})`
         ).join('\n\n');
         break;
-      case 'projects':
+      case 'projects': {
         const sortedProj = [...data.projects].sort((a, b) => (b.stars || 0) - (a.stars || 0));
         response = sortedProj.map(p => {
           const rating = p.stars ? ` [Rating: ${p.stars}/5]` : '';
           return `★ ${p.title} (${p.status || 'Completed'})${rating}\n  - Tags: ${p.tags.join(', ')}\n  - ${p.description}`;
         }).join('\n\n');
         break;
+      }
       case 'skills':
         response = `Technical Stack:\n  • ` + data.skills.join('\n  • ');
         break;

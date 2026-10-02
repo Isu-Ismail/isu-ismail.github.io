@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, X, Award, ExternalLink } from 'lucide-react';
 import { resolveAssetPath } from '../utils';
 

@@ -190,6 +190,18 @@ section {
   -webkit-backface-visibility: hidden;
 }
 
+/* Pause orb float animation while actively scrolling, and whenever the user
+   has requested reduced motion — cuts compositor work on top of scroll. */
+.ambient-bg-layer.is-scrolling [class*="glow-orb"] {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-bg-layer [class*="glow-orb"] {
+    animation: none;
+  }
+}
+
 .bg-grid-subtle {
   background-size: 36px 36px;
   background-image: 

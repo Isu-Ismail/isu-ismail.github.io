@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
-import { data } from '../data.js';
-import { projectDetailsData } from './projectDetailsData.js';
+import { data as staticData } from '../data.js';
+import { useProjects } from './hooks/useProjects';
+import { useProjectDetails } from './hooks/useProjectDetails';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { About } from './components/About';
 import { Projects } from './components/Projects';
 import { ProjectDetail } from './components/ProjectDetail';
+import { ProjectDetailSkeleton } from './components/ProjectDetailSkeleton';
 import { Timeline } from './components/Timeline';
 import { Skills } from './components/Skills';
 import { Certificates } from './components/Certificates';
@@ -28,6 +30,15 @@ const InstagramIcon = ({ size = 20 }) => (
 );
 
 export default function App() {
+  // Bio/contact/education/skills/etc. always come from the bundled data.js —
+  // instant, no fetch, no flash of an empty page on first visit. Only
+  // project cards + case-study content come from Firestore (see
+  // useProjects/useProjectDetails); projects falls back to data.js/
+  // projectDetailsData.js too if Firestore is disabled or unreachable. The
+  // Projects section shows its own skeleton while this is in flight instead
+  // of silently substituting the static list, so it's visibly fetching.
+  const { projects, loading: projectsLoading } = useProjects();
+  const data = { ...staticData, projects };
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [resumeModalOpen, setResumeModalOpen] = useState(false);
@@ -79,13 +90,6 @@ export default function App() {
     }
   };
 
-  // Handle fake navigation state passed to Navbar component
-  const handleNavbarSetView = (viewObj) => {
-    if (viewObj.type === 'home') {
-      navigate('/');
-    }
-  };
-
   return (
     <>
       <Navbar
@@ -93,8 +97,6 @@ export default function App() {
         toggleTheme={toggleTheme}
         toggleTerminal={() => setTerminalOpen(!terminalOpen)}
         currentView={currentView}
-        setView={handleNavbarSetView}
-        resumeUrl={data.resume}
         githubUrl={data.contact.github}
         linkedinUrl={data.contact.linkedin}
         instagramUrl={data.contact.instagram}
@@ -110,8 +112,6 @@ export default function App() {
                 <Hero
                   role={data.role}
                   name={data.name}
-                  about={data.about}
-                  resumeUrl={data.resume}
                   githubUrl={data.contact.github}
                   linkedinUrl={data.contact.linkedin}
                   instagramUrl={data.contact.instagram}
@@ -124,7 +124,7 @@ export default function App() {
                 <About
                   aboutText={data.about}
                   profileImg={data.images.profile}
-                  projectsCount={data.projects.length}
+                  projectsCount={projectsLoading ? staticData.projects.length : data.projects.length}
                 />
               </section>
 
@@ -132,6 +132,7 @@ export default function App() {
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                   <Projects
                     projects={data.projects}
+                    loading={projectsLoading}
                     onSelectProject={(projectId) => navigate(`/projects/${projectId}`)}
                   />
                 </div>
@@ -310,19 +311,47 @@ export default function App() {
   );
 }
 
-// Wrapper component to feed URL parameters into the ProjectDetail component
+// Wrapper component to feed URL parameters into the ProjectDetail component.
+// Keying the inner component by projectId forces a remount (not just a
+// re-render) when navigating directly between two project pages, so
+// useProjectDetails' loading state resets and the skeleton shows again
+// instead of the previous project's content lingering.
 function ProjectDetailWrapper() {
   const { projectId } = useParams();
+  return <ProjectDetailLoader key={projectId} projectId={projectId} />;
+}
+
+function ProjectDetailLoader({ projectId }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { project, details, loading, source } = useProjectDetails(projectId);
 
-  const currentProject = data.projects.find(p => p.detailsLink && p.detailsLink.includes(projectId));
-  const currentProjectDetails = projectDetailsData[projectId];
+  // Reset scroll immediately on navigating to a (new) project page — this
+  // component remounts per projectId (keyed above), so this fires right
+  // away for the skeleton too, instead of waiting for real content to mount.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
-  if (!currentProject || !currentProjectDetails) {
+  // Go back with real browser history (not a fresh push) whenever this entry
+  // was reached via in-app navigation (location.key is 'default' only for a
+  // direct/deep link with no prior SPA history) — restores the home page's
+  // previous scroll position (the Projects section) via the browser's
+  // native scroll restoration, instead of landing back at the top.
+  const goBack = () => {
+    if (location.key !== 'default') navigate(-1);
+    else navigate('/');
+  };
+
+  if (loading) {
+    return <ProjectDetailSkeleton />;
+  }
+
+  if (!project || !details) {
     return (
       <div className="py-32 text-center text-text-primary text-xl relative z-10">
         <p className="mb-4">Project not found.</p>
-        <button onClick={() => navigate('/')} className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-sm cursor-pointer transition-all border-none bg-primary text-bg-secondary hover:bg-primary-hover">
+        <button onClick={goBack} className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-sm cursor-pointer transition-all border-none bg-primary text-bg-secondary hover:bg-primary-hover">
           Back to Home
         </button>
       </div>
@@ -331,9 +360,10 @@ function ProjectDetailWrapper() {
 
   return (
     <ProjectDetail
-      project={currentProject}
-      details={currentProjectDetails}
-      onBack={() => navigate('/')}
+      project={project}
+      details={details}
+      onBack={goBack}
+      animate={source !== 'cache'}
     />
   );
 }

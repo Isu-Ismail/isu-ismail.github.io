@@ -1,26 +1,27 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Award, X, ZoomIn } from 'lucide-react';
 
 export const Certificates = ({ certificates }) => {
-  if (!certificates || certificates.length === 0) return null;
-
+  // Hooks must run unconditionally on every render (Rules of Hooks) — the
+  // empty-list guard lives below, after all hooks.
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightbox, setLightbox] = useState(null); // holds the cert object when open
   const timeoutRef = useRef(null);
+  const count = certificates?.length || 0;
 
   const resetTimeout = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
   };
 
   useEffect(() => {
-    if (lightbox) return; // pause auto-play when lightbox is open
+    if (lightbox || count === 0) return; // pause auto-play when lightbox is open or empty
     resetTimeout();
     timeoutRef.current = setTimeout(
-      () => setActiveIndex((prev) => (prev === certificates.length - 1 ? 0 : prev + 1)),
+      () => setActiveIndex((prev) => (prev === count - 1 ? 0 : prev + 1)),
       5000
     );
     return () => resetTimeout();
-  }, [activeIndex, certificates.length, lightbox]);
+  }, [activeIndex, count, lightbox]);
 
   // Close lightbox on Escape key
   useEffect(() => {
@@ -28,6 +29,8 @@ export const Certificates = ({ certificates }) => {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+
+  if (!certificates || certificates.length === 0) return null;
 
   const handlePrev = () => setActiveIndex((prev) => (prev === 0 ? certificates.length - 1 : prev - 1));
   const handleNext = () => setActiveIndex((prev) => (prev === certificates.length - 1 ? 0 : prev + 1));

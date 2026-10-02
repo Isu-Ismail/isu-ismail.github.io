@@ -1,4 +1,3 @@
-import React from 'react';
 import { Cpu, Server, Layers, Settings } from 'lucide-react';
 
 export const Skills = ({ skills }) => {
