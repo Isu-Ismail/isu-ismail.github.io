@@ -1,16 +1,16 @@
 export const data = {
   name: "A.M. Ismail",
   role: "System Architect & Engineer",
-  resume: "./assets/resume_ismail.pdf",
+  resume: "https://firebasestorage.googleapis.com/v0/b/portfolio-c1025.firebasestorage.app/o/about%2Fresume_pdf.pdf?alt=media&token=440db090-b11d-4ccf-b518-72b7ac621eae",
   gamePath: [
     { "Dino": "./games/dino/dino.html" },
     { "Pacman": "./games/pacman/pacman.html" },
     { "Tetris": "./games/tetris/tetris.html" }
   ],
   images: {
-    profile: "./assets/me.jpeg",
-    hero: "./assets/hero.jpeg",
-    resume_image: "./assets/resume.jpg"
+    profile: "https://firebasestorage.googleapis.com/v0/b/portfolio-c1025.firebasestorage.app/o/about%2Fprofile.webp?alt=media&token=7542b95c-14c9-4afa-8c3b-bff270962e90",
+    hero: "",
+    resume_image: "https://firebasestorage.googleapis.com/v0/b/portfolio-c1025.firebasestorage.app/o/about%2Fresume_image.webp?alt=media&token=bf9d04c1-7645-4ee2-8715-e69619176967"
   },
   contact: {
     email: "ismailisims1@gmail.com",
@@ -46,7 +46,7 @@ export const data = {
       company: "SRI Energy Valves Private Limited",
       period: "June 2026",
       description: "Underwent focused observational training in industrial valve assembly and shop-floor inventory operations; studied step-by-step mechanical workflows, defect inspection, and systematic part transport logistics.",
-      certificateLink: "./assets/sri_internship.png"
+      certificateLink: "https://firebasestorage.googleapis.com/v0/b/portfolio-c1025.firebasestorage.app/o/about%2Fexperience_certificate_1.png?alt=media&token=96aad004-fb25-4334-a0b1-dbf93c39b6de"
     },
     {
       role: "Chassis Design & Maintenance",
@@ -76,12 +76,12 @@ export const data = {
   certificates: [
     {
       title: "Manufacturing Strategy",
-      image: "./assets/certificates/manufacturing-strategy.jpg",
+      image: "https://firebasestorage.googleapis.com/v0/b/portfolio-c1025.firebasestorage.app/o/about%2Fcertificate1.webp?alt=media&token=9c0b0645-b670-4986-9de2-188934011278",
       desc: "NPTEL Elite Certification by IIT Roorkee. Covered manufacturing planning, competitive strategy, and operational decision-making frameworks. Score: 66% (Jul–Sep 2025)."
     },
     {
       title: "Navigating the Latest Trends in Additive Manufacturing Landscape",
-      image: "./assets/certificates/latest-trends-additive.jpg",
+      image: "https://firebasestorage.googleapis.com/v0/b/portfolio-c1025.firebasestorage.app/o/about%2Fcertificate2.webp?alt=media&token=f80c9c24-a411-4d07-9aab-a1c79a358646",
       desc: "NPTEL Elite Certification by IIT Bombay. Explored current advancements and industry applications in additive manufacturing and 3D printing technologies. Score: 80% (Feb–Mar 2026)."
     }
   ],
@@ -131,7 +131,7 @@ export const data = {
       title: "CWM (Command Watch Manager)",
       description: "A complete workspace and shell history manager for developers. Catalog projects, quick-jump to editors, search history banks, switch GitHub accounts, and copy token-condensed codebase contexts.",
       tags: ["Python", "CLI", "Click", "Rich", "AI Integration", "Workspace Manager", "Developer Tools"],
-      link: "https://isu-ismail.github.io/cwm-docwebsite/index.html",
+      link: "https://cwm.codism.in/",
       detailsLink: "./project_details/cwm.html",
       status: "Completed",
       duration: "Nov 2025 – Dec 2025",
@@ -152,7 +152,7 @@ export const data = {
       title: "NeoCGPA: Intelligent GPA/CGPA Calculator & Target Planner",
       description: "A client-side GPA/CGPA tracker built with Svelte 5. Features instant calculations, in-browser Tesseract.js OCR marksheet scanning, vector PDF export, and target CGPA goal planning.",
       tags: ["Svelte 5", "Vite", "Tesseract.js", "OCR", "jsPDF", "Firebase", "Neo-Brutalism"],
-      link: "https://codism.in/cgpa/",
+      link: "https://cgpa.codism.in/",
       detailsLink: "./project_details/cgpa.html",
       status: "Completed",
       duration: "Aug 2026 – Sep 2026",
@@ -162,7 +162,7 @@ export const data = {
       title: "EggShell: Visual Relational Data Pipeline Builder",
       description: "A local-first, visual database pipeline workspace to stitch and clean spreadsheet data using an in-browser SQLite Web Worker and React Flow canvas.",
       tags: ["React", "SQLite", "React Flow", "Web Worker", "OPFS", "Data Pipeline", "Client-Side Privacy"],
-      link: "https://codism.in/eggshell/",
+      link: "https://eggshell.codism.in/",
       detailsLink: "./project_details/eggshell.html",
       status: "Completed",
       duration: "May 2026",
