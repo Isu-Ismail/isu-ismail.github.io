@@ -1,11 +1,19 @@
 import { fetchDoc, fetchCollection } from '../firebase';
 import { data as staticData } from '../../data.js';
+import { projectDetailsData } from '../../datas/projectDetailsData.js';
 import { getProjectId } from '../utils';
 
 const COLLECTION = 'projects';
 
 function localProjectsList() {
   return (staticData.projects || []).map((p) => ({ id: getProjectId(p), ...p }));
+}
+
+function localProjectDetails(id) {
+  const project = localProjectsList().find((p) => p.id === id);
+  if (!project) return null;
+  const details = projectDetailsData[id] || {};
+  return { project, details, source: 'static-fallback' };
 }
 
 /**
@@ -32,7 +40,8 @@ export async function listProjects() {
  * (subtitle, metrics, images, narratives, architectureNodes, techSpecs,
  * certificate). Firestore stores both merged in one `projects/{id}` doc;
  * this splits them back into { project, details } to match the shape
- * `ProjectDetail.jsx` expects. No local fallback, no caching.
+ * `ProjectDetail.jsx` expects. Falls back to bundled local details if
+ * Firestore is unreachable or loading.
  */
 export async function getProjectDetails(id) {
   try {
@@ -46,7 +55,11 @@ export async function getProjectDetails(id) {
       };
     }
   } catch (err) {
+    const fallback = localProjectDetails(id);
+    if (fallback) return { ...fallback, error: err };
     return { project: null, details: null, source: 'error', error: err };
   }
+  const fallback = localProjectDetails(id);
+  if (fallback) return fallback;
   return { project: null, details: null, source: 'empty' };
 }

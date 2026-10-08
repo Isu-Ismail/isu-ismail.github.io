@@ -154,7 +154,11 @@ export const Projects = ({ projects, loading, onSelectProject }) => {
   // back with the full merged doc, so this is already present without a
   // second fetch).
   const getProjectAlias = (project) => {
-    const hasDetailPage = Boolean(project.detailsLink) || Boolean(project.narratives?.length);
+    const hasDetailPage =
+      Boolean(project.detailsLink) ||
+      Boolean(project.narratives?.length) ||
+      Boolean(project.subtitle) ||
+      Boolean(project.images?.length);
     if (!hasDetailPage) return null;
     return project.id || project.detailsLink?.split('/').pop().replace('.html', '');
   };

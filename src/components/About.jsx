@@ -10,7 +10,7 @@ export const About = ({ aboutText, profileImg, projectsCount, stats }) => {
     <div className="max-w-6xl mx-auto px-6 md:px-16 grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-16 items-center w-full">
       <div>
         <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-border-color relative group">
-          <img src={resolveAssetPath(profileImg)} alt="Profile" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" loading="lazy" />
+          <img src={resolveAssetPath(profileImg)} alt="Profile" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103" fetchPriority="high" />
         </div>
       </div>
 

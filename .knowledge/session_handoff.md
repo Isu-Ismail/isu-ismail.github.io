@@ -4,12 +4,18 @@ _Last updated: 2026-10-09_
 
 ## Current state
 
-Fully Firestore-backed SPA, no local static content anywhere in `src/`. `eslint .` clean,
-`vite build` clean. Nothing committed yet this session — all changes below are staged/edited
-only, not committed, not pushed. Follow `CLAUDE.md`'s git rules (no AI co-author trailer; a
-bare "push" means just `git push`, nothing else) when the user asks to commit/push.
+Fully Firestore-backed SPA with local fallbacks (`data.js` and `datas/projectDetailsData.js`) for instant frame-0 renders and resilient offline/unreachable network handling. Firebase client config in `src/firebase.js` carries default public web credentials so GitHub Actions builds without `.env` connect to Firestore seamlessly. Profile image prioritizes loading via `fetchPriority="high"` and storage preconnect.
 
 ## What just happened (this session)
+
+1. **"Project not found" / "Page not found" on `/projects/ctskii`**:
+   - Fixed `src/firebase.js`: added fallback public client credentials so production builds on GitHub Actions (where `.env` is absent) can connect to Firestore.
+   - Fixed `src/api/projects.js`: added `localProjectDetails(id)` fallback using `datas/projectDetailsData.js` and `localProjectsList()`, preventing "Project not found" if network is slow or Firestore is temporarily disconnected.
+   - Clarified `detailsLink`: explained that `detailsLink` was the legacy static HTML link (`./project_details/ctskii.html`), whereas the modern app uses clean dynamic routing `/projects/:id` (`id: 'ctskii'`).
+   - Expanded `hasDetailPage` in `Projects.jsx` to recognize projects with `subtitle` or `images`.
+2. **Profile image loading slow**:
+   - Removed `loading="lazy"` on the main profile picture in `About.jsx` and added `fetchPriority="high"`.
+   - Added `<link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>` to `index.html` so network handshakes complete before the image request.
 
 User reported three problems in one request: (1) reloading on a project detail page
 (`/projects/:id`) showed a blank page, (2) the "View Live" project link didn't seem to reflect

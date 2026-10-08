@@ -1,10 +1,10 @@
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyD_hseKbtTHsPsza5bnwGF6BZDUp-N49EQ',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'portfolio-c1025.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'portfolio-c1025',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'portfolio-c1025.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '553904145158',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:553904145158:web:e83560ca6a789221481487',
 };
 
 export const firebaseEnabled = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId);
