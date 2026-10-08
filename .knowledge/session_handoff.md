@@ -66,16 +66,11 @@ without switching routing to a hash router.
    - Verified: `npx eslint .` clean, `npx vite build` succeeds, `dist/index.html` confirmed
      using absolute asset paths.
 
-## Next agent: what to check
+## Fallback data & unblocking render
 
-- Confirm with the user that reload-on-detail-page and the "View Live" link now actually work
-  on the live deployed site (needs a real deploy + browser check — not done this session, no
-  browser tool was used).
-- Nothing is committed. When the user says "push" or asks to commit, follow `CLAUDE.md`'s git
-  rules exactly (no AI attribution trailer, don't bundle unrelated changes).
-- `datas/` is intentionally kept, not deleted — it's the historical seed data for
-  `scripts/seed-firestore.mjs`/`scripts/upload-project-pictures.mjs`. Don't re-import from it
-  into `src/` without being asked.
+- Restored `data.js` as the instant-render fallback (`localAboutMe()` and `localProjectsList()`) so first paint is never blank while Firestore initializes.
+- Updated `useAboutMe.js` to serve cached or `localAboutMe()` immediately on mount, updating silently in background when Firestore returns.
+- Fixed `aboutReady` in `App.jsx`: previously, every section was blocked waiting for `useImagePreload(data.images?.profile)`. Now latches to `true` whenever data is present or the profile image finishes loading, ensuring content never stays hidden.
 
 ## How to use this file
 

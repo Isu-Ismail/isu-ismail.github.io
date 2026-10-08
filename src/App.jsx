@@ -62,44 +62,16 @@ export default function App() {
   // useProjects/useProjectDetails) — same deal, no local fallback.
   const { projects, loading: projectsLoading } = useProjects();
   const { data: aboutData } = useAboutMe();
-  // Merge over the empty-safe shape (not hardcoded content — just a
-  // complete-but-blank object) so nothing downstream ever destructures
-  // `undefined` while Firestore's fetch is still in flight — there's no
-  // local static fallback to instantly fill this anymore.
-  const data = { ...emptyAboutMe(), ...aboutData, projects };
+  const data = {
+    ...emptyAboutMe(),
+    ...aboutData,
+    projects: projects && projects.length > 0 ? projects : aboutData?.projects || [],
+  };
 
-  // Staged reveal: Hero is always instant (no skeleton — see Hero's own
-  // render below), About/Education/Experience/Certificates/Skills/Contact
-  // all gate on one `aboutReady` flag (About's profile image finishing
-  // download — the real bottleneck, since the text data is already
-  // present). Projects stays independently gated (its own fetch+skeleton,
-  // unchanged) since it's a genuinely separate, slower network call.
-  //
-  // These used to be staged further apart (Education, then Certificates+
-  // Skills+Contact once Education was ready) — measured via CDP scroll
-  // profiling that this caused real flicker: those extra gates meant
-  // Experience/Certificates/Skills (the sections furthest down the page)
-  // were the ones most likely to still be mid-skeleton-swap exactly when a
-  // normal scroll first reached them, and a skeleton→content swap whose
-  // height doesn't exactly match the real content shoves everything below
-  // it — a one-time layout-shift cost, confirmed by profiling (dropped
-  // frames only ever on a section's FIRST reveal, never on a revisit).
-  // Collapsing to one gate means this swap almost always finishes within
-  // ~1-2s of page load — well before a real scroll reaches that far — so
-  // nothing is still swapping by the time the user gets there.
-  //
-  // Once ready, stays ready — a one-way latch. Without this, the
-  // background cache-refresh swapping in a new (Firestore) image URL after
-  // the static one already preloaded would re-trigger useImagePreload's
-  // src-changed reset and flip `aboutReady` back to false, reverting every
-  // section back to a skeleton — exactly the "visual reload" this staging
-  // is meant to avoid.
   const aboutImageReady = useImagePreload(data.images?.profile);
   const [aboutReady, setAboutReady] = useState(false);
-  // React's documented "adjust state during render" pattern (not an effect,
-  // not a ref read) — a one-way latch: once true, stays true for the rest
-  // of this component's lifetime.
-  if (aboutImageReady && !aboutReady) {
+  // React one-way latch: ready if profile image finishes preloading OR if valid data is present
+  if ((aboutImageReady || Boolean(aboutData?.name)) && !aboutReady) {
     setAboutReady(true);
   }
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');

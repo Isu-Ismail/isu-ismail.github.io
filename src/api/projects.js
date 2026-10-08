@@ -1,23 +1,29 @@
 import { fetchDoc, fetchCollection } from '../firebase';
+import { data as staticData } from '../../data.js';
+import { getProjectId } from '../utils';
 
 const COLLECTION = 'projects';
+
+function localProjectsList() {
+  return (staticData.projects || []).map((p) => ({ id: getProjectId(p), ...p }));
+}
 
 /**
  * GET /projects — project grid card data (title, tags, link, status,
  * duration, stars...). Each returned project carries its stable `id`, used
  * both as the /projects/:id route param and the Firestore doc id.
- *
- * No local fallback, no caching — projects are managed via an external admin
- * panel and edits should show up on the next load, not up to 30 minutes
- * later or from a bundled snapshot.
+ * Falls back to bundled data.js if Firestore is loading or unreachable.
  */
 export async function listProjects() {
   try {
     const remote = await fetchCollection(COLLECTION);
-    return { projects: remote, source: 'firestore' };
+    if (remote && remote.length > 0) {
+      return { projects: remote, source: 'firestore' };
+    }
   } catch (err) {
-    return { projects: [], source: 'error', error: err };
+    return { projects: localProjectsList(), source: 'static-fallback', error: err };
   }
+  return { projects: localProjectsList(), source: 'static' };
 }
 
 /**
