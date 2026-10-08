@@ -1,19 +1,11 @@
 import { fetchDoc, fetchCollection } from '../firebase';
 import { data as staticData } from '../../data.js';
-import { projectDetailsData } from '../../datas/projectDetailsData.js';
 import { getProjectId } from '../utils';
 
 const COLLECTION = 'projects';
 
 function localProjectsList() {
   return (staticData.projects || []).map((p) => ({ id: getProjectId(p), ...p }));
-}
-
-function localProjectDetails(id) {
-  const project = localProjectsList().find((p) => p.id === id);
-  if (!project) return null;
-  const details = projectDetailsData[id] || {};
-  return { project, details, source: 'static-fallback' };
 }
 
 /**
@@ -55,11 +47,7 @@ export async function getProjectDetails(id) {
       };
     }
   } catch (err) {
-    const fallback = localProjectDetails(id);
-    if (fallback) return { ...fallback, error: err };
     return { project: null, details: null, source: 'error', error: err };
   }
-  const fallback = localProjectDetails(id);
-  if (fallback) return fallback;
   return { project: null, details: null, source: 'empty' };
 }
