@@ -1,48 +1,29 @@
 import { useEffect, useState } from 'react';
 import { X, Download, FileText, Loader } from 'lucide-react';
 
-const CACHE_KEY = 'resume_image_b64';
+// Plain <img src> — no fetch()-and-cache-as-base64. That approach broke once
+// resumeImage became a Firebase Storage URL: fetch() needs CORS headers on
+// the response to be readable cross-origin, and Storage's default config
+// doesn't send them (the image still LOADS fine via <img>, which never
+// needs CORS — only reading the bytes via fetch/XHR does). The browser's own
+// HTTP cache already makes repeat opens fast without any of that.
+function useImageLoadState(url) {
+  const [prevUrl, setPrevUrl] = useState(url);
+  const [status, setStatus] = useState(url ? 'loading' : 'empty'); // 'loading' | 'loaded' | 'error' | 'empty'
 
-/**
- * Fetches the image once, stores it as a base64 data URL in localStorage.
- * Every subsequent open reads directly from localStorage — zero network request.
- */
-function useLocalStorageImage(url) {
-  const [src, setSrc] = useState(() => {
-    try { return localStorage.getItem(CACHE_KEY) || null; } catch { return null; }
-  });
-  const [loading, setLoading] = useState(!src);
+  // Reset synchronously during render when the url changes (React's
+  // documented pattern), not via setState inside an effect.
+  if (url !== prevUrl) {
+    setPrevUrl(url);
+    setStatus(url ? 'loading' : 'empty');
+  }
 
-  useEffect(() => {
-    if (!url || src) return; // already cached — skip fetch entirely
-
-    // `loading` already starts true whenever `src` is falsy (the only time
-    // this effect body runs past the guard above), so no setState needed here.
-    let cancelled = false;
-
-    fetch(url)
-      .then((res) => res.blob())
-      .then((blob) => new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(blob);
-      }))
-      .then((dataUrl) => {
-        if (cancelled) return;
-        try { localStorage.setItem(CACHE_KEY, dataUrl); } catch { /* storage full */ }
-        setSrc(dataUrl);
-        setLoading(false);
-      })
-      .catch(() => { if (!cancelled) setLoading(false); });
-
-    return () => { cancelled = true; };
-  }, [url, src]);
-
-  return { src, loading };
+  return { status, onLoad: () => setStatus('loaded'), onError: () => setStatus('error') };
 }
 
 export const ResumeModal = ({ isOpen, onClose, resumeUrl, resumeImage }) => {
-  const { src, loading } = useLocalStorageImage(resumeImage);
+  const { status, onLoad, onError } = useImageLoadState(resumeImage);
+  const loading = status === 'loading';
 
   // Close on Escape key
   useEffect(() => {
@@ -122,25 +103,29 @@ export const ResumeModal = ({ isOpen, onClose, resumeUrl, resumeImage }) => {
         {/* Preview body */}
         <div className="flex-1 overflow-auto bg-bg-primary/60 p-4 sm:p-6 flex items-start justify-center min-h-0">
           <div className="w-full rounded-xl overflow-hidden border border-border-color shadow-xl">
-            {loading ? (
-              /* First-visit skeleton loader while fetching */
-              <div className="flex flex-col items-center justify-center py-32 gap-4 text-text-muted bg-bg-secondary">
-                <Loader size={32} className="animate-spin opacity-40" />
-                <p className="text-sm">Loading resume preview…</p>
-              </div>
-            ) : src ? (
-              /* Cached base64 — instant on every visit after the first */
-              <img
-                src={src}
-                alt="Resume preview"
-                className="w-full h-auto object-contain block"
-                draggable={false}
-              />
-            ) : (
+            {status === 'empty' || status === 'error' ? (
               <div className="flex flex-col items-center justify-center py-24 text-text-muted gap-4">
                 <FileText size={48} className="opacity-30" />
                 <p className="text-sm">No preview available — click Download PDF above.</p>
               </div>
+            ) : (
+              <>
+                {loading && (
+                  <div className="flex flex-col items-center justify-center py-32 gap-4 text-text-muted bg-bg-secondary">
+                    <Loader size={32} className="animate-spin opacity-40" />
+                    <p className="text-sm">Loading resume preview…</p>
+                  </div>
+                )}
+                <img
+                  src={resumeImage}
+                  alt="Resume preview"
+                  className="w-full h-auto object-contain block"
+                  style={{ display: loading ? 'none' : 'block' }}
+                  draggable={false}
+                  onLoad={onLoad}
+                  onError={onError}
+                />
+              </>
             )}
           </div>
         </div>

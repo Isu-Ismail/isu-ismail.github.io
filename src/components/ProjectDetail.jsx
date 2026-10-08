@@ -82,6 +82,14 @@ export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [lightboxOpen, allMedia.length]);
 
+  // Keep the page from scrolling behind the full-screen lightbox overlay.
+  useEffect(() => {
+    document.body.style.overflow = lightboxOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [lightboxOpen]);
+
   if (!project || !details) return null;
 
   return (
@@ -109,7 +117,7 @@ export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
                 <span className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
                   project.status.toLowerCase() === 'completed'
                     ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
-                    : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                    : 'bg-sky-500/10 text-sky-500 border-sky-500/20'
                 }`}>
                   {project.status}
                 </span>
@@ -140,7 +148,7 @@ export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
         <p className="text-lg text-text-secondary max-w-3xl leading-relaxed">{details.subtitle}</p>
         <div className="flex flex-wrap gap-2">
           {project.tags.map((tag, idx) => (
-            <span key={idx} className="font-mono text-xs bg-bg-secondary border border-border-color text-text-secondary px-3.5 py-1 rounded-full">{tag}</span>
+            <span key={idx} className="font-mono text-xs text-primary/80 bg-primary/5 border border-primary/15 px-3 py-1 rounded-md">#{tag.toLowerCase().replace(/\s+/g, '-')}</span>
           ))}
         </div>
       </header>
@@ -148,46 +156,54 @@ export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
       {/* Metrics Grid */}
       <section className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 ${animate ? 'animate-fade-in [animation-delay:0.1s]' : ''}`}>
         {details.metrics.map((m, idx) => (
-          <div key={idx} className="bg-bg-secondary border border-border-color p-6 rounded-2xl text-center transition-all duration-300 hover:border-primary hover:-translate-y-1 hover:shadow-lg">
+          <div key={idx} className="relative bg-bg-secondary border border-border-color border-t-2 border-t-primary p-6 rounded-lg text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg corner-brackets">
             <span className="text-3xl font-extrabold text-primary font-heading block mb-1">{m.value}</span>
-            <span className="text-[11px] text-text-muted font-bold uppercase tracking-wider">{m.label}</span>
+            <span className="text-[11px] text-text-muted font-mono uppercase tracking-wider">// {m.label}</span>
           </div>
         ))}
       </section>
 
       {/* Image Carousel */}
       {details.images && details.images.length > 0 && (
-        <section className={`relative rounded-3xl border border-border-color overflow-hidden bg-slate-950 mb-16 shadow-lg ${animate ? 'animate-fade-in [animation-delay:0.15s]' : ''}`}>
-          <div className="absolute top-4 right-4 bg-black/70 text-white font-mono text-xs px-2.5 py-1 rounded border border-white/10 z-10">
-            {carouselIndex + 1} / {details.images.length}
+        <section className={`relative rounded-lg border border-border-color overflow-hidden bg-slate-950 mb-16 shadow-lg ${animate ? 'animate-fade-in [animation-delay:0.15s]' : ''}`}>
+          <div className="flex items-center justify-between gap-3 px-4 py-2.5 bg-black/80 border-b border-white/10 relative z-10">
+            <div className="window-dots">
+              <span /><span /><span />
+            </div>
+            <span className="font-mono text-[10px] text-white/50 truncate">gallery/slide_{String(carouselIndex + 1).padStart(2, '0')}</span>
+            <span className="font-mono text-[10px] text-white/70 px-2 py-0.5 rounded border border-white/15 flex-shrink-0">
+              {carouselIndex + 1} / {details.images.length}
+            </span>
           </div>
 
-          <div 
-            className="flex h-[300px] md:h-[480px] transition-transform duration-500 ease-out"
-            style={{ transform: `translateX(-${carouselIndex * 100}%)` }}
-          >
-            {details.images.map((imgUrl, idx) => (
-              <div key={idx} className="min-w-full h-full relative cursor-pointer overflow-hidden flex items-center justify-center" onClick={() => openLightbox(idx)}>
-                {/* Blurred backdrop costs a dedicated GPU layer per image — only
-                    mount it for the active slide instead of all N slides at once. */}
-                {idx === carouselIndex && (
-                  <img src={resolveAssetPath(imgUrl)} className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-45 scale-11 transform-gpu will-change-transform" alt="" />
-                )}
-                <img src={resolveAssetPath(imgUrl)} className="relative max-h-full max-w-full object-contain z-10 transition-transform duration-500 hover:scale-[1.01]" alt={`Slide ${idx + 1}`} loading={idx === 0 ? 'eager' : 'lazy'} />
-              </div>
-            ))}
-          </div>
+          <div className="relative">
+            <div
+              className="flex h-[300px] md:h-[480px] transition-transform duration-500 ease-out"
+              style={{ transform: `translateX(-${carouselIndex * 100}%)` }}
+            >
+              {details.images.map((imgUrl, idx) => (
+                <div key={idx} className="min-w-full h-full relative cursor-pointer overflow-hidden flex items-center justify-center" onClick={() => openLightbox(idx)}>
+                  {/* Blurred backdrop costs a dedicated GPU layer per image — only
+                      mount it for the active slide instead of all N slides at once. */}
+                  {idx === carouselIndex && (
+                    <img src={resolveAssetPath(imgUrl)} className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-45 scale-11 transform-gpu will-change-transform" alt="" />
+                  )}
+                  <img src={resolveAssetPath(imgUrl)} className="relative max-h-full max-w-full object-contain z-10 transition-transform duration-500 hover:scale-[1.01]" alt={`Slide ${idx + 1}`} loading={idx === 0 ? 'eager' : 'lazy'} />
+                </div>
+              ))}
+            </div>
 
-          {details.images.length > 1 && (
-            <>
-              <button className="absolute top-1/2 -translate-y-1/2 left-4 bg-black/60 border border-white/15 text-white w-11 h-11 rounded-full flex items-center justify-center cursor-pointer z-10 transition-all duration-200 backdrop-blur-xs hover:bg-primary hover:border-primary" onClick={handleCarouselPrev}>
-                <ChevronLeft size={20} />
-              </button>
-              <button className="absolute top-1/2 -translate-y-1/2 right-4 bg-black/60 border border-white/15 text-white w-11 h-11 rounded-full flex items-center justify-center cursor-pointer z-10 transition-all duration-200 backdrop-blur-xs hover:bg-primary hover:border-primary" onClick={handleCarouselNext}>
-                <ChevronRight size={20} />
-              </button>
-            </>
-          )}
+            {details.images.length > 1 && (
+              <>
+                <button className="absolute top-1/2 -translate-y-1/2 left-4 bg-black/60 border border-white/15 text-white w-11 h-11 rounded-full flex items-center justify-center cursor-pointer z-10 transition-all duration-200 backdrop-blur-xs hover:bg-primary hover:border-primary" onClick={handleCarouselPrev}>
+                  <ChevronLeft size={20} />
+                </button>
+                <button className="absolute top-1/2 -translate-y-1/2 right-4 bg-black/60 border border-white/15 text-white w-11 h-11 rounded-full flex items-center justify-center cursor-pointer z-10 transition-all duration-200 backdrop-blur-xs hover:bg-primary hover:border-primary" onClick={handleCarouselNext}>
+                  <ChevronRight size={20} />
+                </button>
+              </>
+            )}
+          </div>
         </section>
       )}
 
@@ -219,49 +235,65 @@ export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
         <div className="lg:sticky lg:top-24 space-y-8 w-full transform-gpu">
           {/* Deployment Architecture visual card */}
           {details.architectureNodes && (
-            <div className="bg-bg-secondary border border-border-color rounded-2xl p-8 shadow-md text-left">
-              <h3 className="text-lg font-bold text-text-primary mb-6 text-center border-b border-dashed border-border-color pb-3 flex items-center justify-center gap-2">
-                <GitBranch size={16} className="text-primary" />
-                {details.architectureTitle || 'Deployment Architecture'}
-              </h3>
+            <div className="bg-bg-secondary border border-border-color rounded-lg overflow-hidden shadow-md text-left">
+              <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-border-color bg-bg-tertiary/60">
+                <div className="window-dots">
+                  <span /><span /><span />
+                </div>
+                <span className="font-mono text-[10px] text-text-muted truncate">architecture.yaml</span>
+              </div>
+              <div className="p-7">
+                <h3 className="text-lg font-bold text-text-primary mb-6 text-center flex items-center justify-center gap-2">
+                  <GitBranch size={16} className="text-primary" />
+                  {details.architectureTitle || 'Deployment Architecture'}
+                </h3>
 
-              <div className="flex flex-col gap-4">
-                {details.architectureNodes.map((node, idx) => (
-                  <React.Fragment key={idx}>
-                    <div className="bg-bg-tertiary border border-border-color rounded-2xl p-4 flex items-center gap-4 transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:scale-[1.02]">
-                      <span className="bg-bg-secondary border border-border-color w-10 h-10 rounded-xl flex items-center justify-center text-primary flex-shrink-0">
-                        <IconMapper name={node.icon} />
-                      </span>
-                      <div className="flex-grow">
-                        <div className="text-sm font-bold text-text-primary mb-0.5">{node.title}</div>
-                        <div className="text-xs text-text-muted font-mono">{node.desc}</div>
+                <div className="flex flex-col gap-4">
+                  {details.architectureNodes.map((node, idx) => (
+                    <React.Fragment key={idx}>
+                      <div className="bg-bg-tertiary border border-border-color rounded-lg p-4 flex items-center gap-4 transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:scale-[1.02]">
+                        <span className="bg-bg-secondary border border-border-color w-10 h-10 rounded-lg flex items-center justify-center text-primary flex-shrink-0">
+                          <IconMapper name={node.icon} />
+                        </span>
+                        <div className="flex-grow">
+                          <div className="text-sm font-bold text-text-primary mb-0.5">{node.title}</div>
+                          <div className="text-xs text-text-muted font-mono">{node.desc}</div>
+                        </div>
                       </div>
-                    </div>
-                    {idx < details.architectureNodes.length - 1 && (
-                      <div className="flex justify-center text-primary opacity-60 -my-1">
-                        <ChevronRight size={16} className="rotate-90" />
-                      </div>
-                    )}
-                  </React.Fragment>
-                ))}
+                      {idx < details.architectureNodes.length - 1 && (
+                        <div className="flex justify-center text-primary opacity-60 -my-1">
+                          <ChevronRight size={16} className="rotate-90" />
+                        </div>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
           {/* Technical Specifications */}
           {details.techSpecs && (
-            <div className="bg-bg-secondary border border-border-color rounded-2xl p-8 text-left">
-              <h3 className="text-lg font-bold text-text-primary mb-5 flex items-center gap-2">
-                <Layers size={16} className="text-primary" />
-                Technical Specifications
-              </h3>
-              <div className="divide-y divide-border-color">
-                {details.techSpecs.map((spec, idx) => (
-                  <div key={idx} className="flex justify-between items-center text-sm py-3 last:pb-0">
-                    <span className="text-text-muted font-medium">{spec.label}</span>
-                    <span className="font-mono font-semibold text-text-primary text-right">{spec.value}</span>
-                  </div>
-                ))}
+            <div className="bg-bg-secondary border border-border-color rounded-lg overflow-hidden text-left">
+              <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-border-color bg-bg-tertiary/60">
+                <div className="window-dots">
+                  <span /><span /><span />
+                </div>
+                <span className="font-mono text-[10px] text-text-muted truncate">techspecs.json</span>
+              </div>
+              <div className="p-7">
+                <h3 className="text-lg font-bold text-text-primary mb-5 flex items-center gap-2">
+                  <Layers size={16} className="text-primary" />
+                  Technical Specifications
+                </h3>
+                <div className="divide-y divide-border-color">
+                  {details.techSpecs.map((spec, idx) => (
+                    <div key={idx} className="flex justify-between items-center text-sm py-3 last:pb-0">
+                      <span className="text-text-muted font-medium">{spec.label}</span>
+                      <span className="font-mono font-semibold text-text-primary text-right">{spec.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

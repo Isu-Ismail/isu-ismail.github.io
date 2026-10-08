@@ -77,10 +77,11 @@
       <textarea id="narratives" class="json"></textarea>
 
       <h2>Images</h2>
-      <p class="muted">Upload screenshots for the case-study carousel. Uploaded files go to Firebase Storage under <code class="hint">projects/{id}/</code>.</p>
+      <p class="muted">Upload screenshots for the case-study carousel — stored as <code class="hint">1.png</code>, <code class="hint">2.png</code>... under <code class="hint">projects/{id}/</code>, matching their display order. Drag a thumbnail to reorder (just changes carousel order, doesn't touch Storage filenames); removing one renumbers the rest automatically so the sequence stays contiguous.</p>
       <div class="thumb-grid" id="image-thumbs"></div>
       <div class="row" style="margin-top:0.75rem">
         <input type="file" id="image-upload" accept="image/*" multiple />
+        <button type="button" id="renumber-btn">Renumber to match order</button>
         <span class="status" id="upload-status"></span>
       </div>
 
@@ -103,7 +104,8 @@
     import { requireAuth, logout } from "./js/auth.js";
     import {
       listProjects, getProject, saveProject, deleteProject,
-      uploadProjectImage, deleteProjectImage,
+      uploadProjectImage, uploadCertificateImage, deleteProjectImage,
+      renumberProjectImages,
     } from "./js/projects-api.js";
 
     requireAuth(() => {});
@@ -121,22 +123,64 @@
       statusEl.className = `status ${isErr ? "err" : "ok"}`;
     }
 
+    let dragFromIndex = null;
+
+    async function removeImageAt(i) {
+      await deleteProjectImage(images[i]);
+      images.splice(i, 1);
+      renderThumbs();
+      const id = $("id").value.trim();
+      if (id && images.length > 0) {
+        $("upload-status").textContent = "Renumbering remaining images…";
+        images = await renumberProjectImages(id, images);
+        $("upload-status").textContent = "Removed and renumbered.";
+        renderThumbs();
+      }
+    }
+
     function renderThumbs() {
       $("image-thumbs").innerHTML = images
-        .map((url, i) => `<div><img src="${url}" /><br/><button type="button" data-remove-img="${i}" style="margin-top:4px">Remove</button></div>`)
+        .map((url, i) => `
+          <div class="thumb-item" draggable="true" data-index="${i}">
+            <img src="${url}" />
+            <span class="thumb-pos">#${i + 1}</span><br/>
+            <button type="button" data-remove-img="${i}" style="margin-top:4px">Remove</button>
+          </div>
+        `)
         .join("");
       $("certificate-thumb").innerHTML = certificate
         ? `<div><img src="${certificate}" /><br/><button type="button" id="remove-cert" style="margin-top:4px">Remove</button></div>`
         : "";
 
       $("image-thumbs").querySelectorAll("[data-remove-img]").forEach((btn) => {
-        btn.addEventListener("click", async () => {
-          const i = Number(btn.dataset.removeImg);
-          await deleteProjectImage(images[i]);
-          images.splice(i, 1);
+        btn.addEventListener("click", () => removeImageAt(Number(btn.dataset.removeImg)));
+      });
+
+      // Drag-and-drop reorder — only changes array order (and thus the
+      // carousel's display order on save), never touches Storage filenames.
+      $("image-thumbs").querySelectorAll(".thumb-item").forEach((el) => {
+        el.addEventListener("dragstart", () => {
+          dragFromIndex = Number(el.dataset.index);
+          el.classList.add("dragging");
+        });
+        el.addEventListener("dragend", () => el.classList.remove("dragging"));
+        el.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          el.classList.add("drag-over");
+        });
+        el.addEventListener("dragleave", () => el.classList.remove("drag-over"));
+        el.addEventListener("drop", (e) => {
+          e.preventDefault();
+          el.classList.remove("drag-over");
+          const toIndex = Number(el.dataset.index);
+          if (dragFromIndex === null || dragFromIndex === toIndex) return;
+          const [moved] = images.splice(dragFromIndex, 1);
+          images.splice(toIndex, 0, moved);
+          dragFromIndex = null;
           renderThumbs();
         });
       });
+
       const removeCertBtn = document.getElementById("remove-cert");
       if (removeCertBtn) {
         removeCertBtn.addEventListener("click", async () => {
@@ -248,12 +292,25 @@
       }
       $("upload-status").textContent = `Uploading ${files.length} file(s)…`;
       for (const file of files) {
-        const url = await uploadProjectImage(id, file);
+        const position = images.length + 1; // 1-indexed, next slot
+        const url = await uploadProjectImage(id, file, position);
         images.push(url);
       }
       $("upload-status").textContent = "Upload complete.";
       renderThumbs();
       e.target.value = "";
+    });
+
+    $("renumber-btn").addEventListener("click", async () => {
+      const id = $("id").value.trim();
+      if (!id) {
+        alert("Set the project id first.");
+        return;
+      }
+      $("upload-status").textContent = "Renumbering…";
+      images = await renumberProjectImages(id, images);
+      $("upload-status").textContent = "Renumbered to match current order.";
+      renderThumbs();
     });
 
     $("certificate-upload").addEventListener("change", async (e) => {
@@ -265,7 +322,7 @@
         e.target.value = "";
         return;
       }
-      certificate = await uploadProjectImage(id, file);
+      certificate = await uploadCertificateImage(id, file);
       renderThumbs();
       e.target.value = "";
     });

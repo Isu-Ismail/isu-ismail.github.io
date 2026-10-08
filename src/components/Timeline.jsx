@@ -15,6 +15,16 @@ export const Timeline = ({ title, subtitle, items }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeCert]);
 
+  // Without this, the page behind the fixed/backdrop-blur-md modal stays
+  // scrollable — scrolling a full-screen blur filter on every frame is the
+  // same class of jank already fixed elsewhere (Navbar, carousel backdrop).
+  useEffect(() => {
+    document.body.style.overflow = activeCert ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [activeCert]);
+
   if (!items || items.length === 0) return null;
 
   return (

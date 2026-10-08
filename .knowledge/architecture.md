@@ -9,15 +9,26 @@ See README.md for the top-level folder map. Key points not obvious from file nam
   `useProjectDetails(projectId)` for that project's case-study content).
 - **Data layer (`src/api/` + `src/hooks/` + `src/firebase.js`)** — split by what's actually
   worth fetching:
-  - **Bio/contact/education/experience/skills/interests/certificates always come straight
-    from `data.js`** — `App.jsx` imports it directly (`staticData`), no fetch, no loading
-    state, no empty-page flash on first visit. There is no `src/hooks/useAboutMe.js` or
-    `src/api/about.js` on purpose (deleted) — the only thing that still reads/writes Firestore
-    `about/main` is the admin panel (`admin/js/about-api.js`), which is now a content-notes
-    store the live site doesn't consult. Don't recreate a site-side `useAboutMe` hook without
-    re-confirming the user still wants that; last explicit instruction was "data.js for the
-    home page only."
-  - **Only projects are Firestore-backed.** Firestore schema: `projects/{id}` (one doc per
+  - **Bio/contact/education/experience/skills/interests/certificates/stats/resume are
+    Firestore-backed** via `src/hooks/useAboutMe.js` + `src/api/about.js`, reading the single
+    `about/main` doc. (An earlier turn this session had reverted this to `data.js`-only to
+    kill an empty-page flash on first visit; a later turn restored Firestore-backing properly
+    once the user started actually editing `about/main` via the admin panel and needed it to
+    show up — don't re-revert without checking which instruction is current.) The hook never
+    exposes a loading flag: a lazy `useState` initializer serves a 5-minute sessionStorage
+    cache instantly if present, else `data.js`'s static values instantly, and a background
+    fetch silently swaps in Firestore's result when it resolves (no visual reload). `App.jsx`
+    stages WHEN each section reveals that already-available data — Hero instantly (text only,
+    falls back to static if Firestore never responds), About once its profile image actually
+    finishes downloading (`src/hooks/useImagePreload.js`, gates via a one-way latch — see
+    session_handoff.md for why a non-latched version was a real bug), Education/Experience
+    once About's ready AND Projects' fetch resolved, Certificates/Skills/Contact once
+    Education's ready. Matching skeletons: `AboutSkeleton.jsx`, `TimelineSkeleton.jsx`,
+    `SectionSkeletons.jsx`. There is deliberately no separate `useResume.js`/`api/resume.js`
+    anymore — that was a second independent fetch of the identical `about/main` doc; folded
+    into `useAboutMe` since one fetch read for everything is strictly faster than two.
+  - **Only projects are a separate Firestore collection** (genuinely needs its own fetch —
+    unbounded-size list, not a single small doc). Schema: `projects/{id}` (one doc per
     project, merging card fields + case-study fields; `{id}` doubles as the `/projects/:id`
     route param — see `src/utils.js`'s `getProjectId()`/`slugifyTitle()`).
   - `src/api/projects.js` (`listProjects()`, `getProjectDetails(id)`) is the only file that

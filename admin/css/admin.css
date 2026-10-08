@@ -109,7 +109,11 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .project-item .meta { color: var(--text-muted); font-size: 0.8rem; }
 
 .thumb-grid { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
-.thumb-grid img { width: 90px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); }
+.thumb-grid img { width: 90px; height: 60px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); pointer-events: none; }
+.thumb-grid .thumb-item { cursor: grab; text-align: center; }
+.thumb-grid .thumb-item.dragging { opacity: 0.35; }
+.thumb-grid .thumb-item.drag-over { outline: 2px dashed var(--primary); outline-offset: 2px; }
+.thumb-grid .thumb-item .thumb-pos { font-size: 0.7rem; color: var(--text-muted); display: block; margin-top: 2px; }
 
 .login-box { max-width: 360px; margin: 10vh auto 0; }
 

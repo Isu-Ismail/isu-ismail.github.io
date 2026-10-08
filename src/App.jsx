@@ -1,19 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { data as staticData } from '../data.js';
 import { useProjects } from './hooks/useProjects';
+import { useAboutMe } from './hooks/useAboutMe';
+import { useImagePreload } from './hooks/useImagePreload';
 import { useProjectDetails } from './hooks/useProjectDetails';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { About } from './components/About';
+import { AboutSkeleton } from './components/AboutSkeleton';
 import { Projects } from './components/Projects';
-import { ProjectDetail } from './components/ProjectDetail';
 import { ProjectDetailSkeleton } from './components/ProjectDetailSkeleton';
+import { TimelineSkeleton } from './components/TimelineSkeleton';
+import { CertificatesSkeleton, SkillsSkeleton, ContactSkeleton } from './components/SectionSkeletons';
+
+// Code-split: ProjectDetail pulls in DOMPurify + a large icon set only ever
+// needed on a project's own page — keeping it out of the home-page bundle
+// visitors get on first load.
+const ProjectDetail = lazy(() => import('./components/ProjectDetail').then((m) => ({ default: m.ProjectDetail })));
 import { Timeline } from './components/Timeline';
 import { Skills } from './components/Skills';
 import { Certificates } from './components/Certificates';
 import { Terminal } from './components/Terminal';
 import { UnifiedBackground } from './components/UnifiedBackground';
+import { Reveal } from './components/Reveal';
 import { ResumeModal } from './components/ResumeModal';
 import { Mail, MapPin, Phone } from 'lucide-react';
 
@@ -29,16 +39,67 @@ const InstagramIcon = ({ size = 20 }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
 );
 
+// In-memory only (NOT sessionStorage) — deliberately resets to these
+// defaults on every real page load/refresh, since that's exactly the
+// "always land on top" behavior wanted. Survives pure client-side SPA
+// navigation (same loaded JS module) so "Back to Projects" can still
+// restore where you were. goToProject() saves the scroll position and
+// clears the restore flag; goBack() (in ProjectDetailLoader below, same
+// module) sets the flag right before navigating back; the home-route
+// effect only ever READS the flag, never resets it — resetting it inside
+// the effect would be undone by React 18 StrictMode's dev-only
+// double-invoke-on-mount, which runs the effect twice in the same tick.
+let savedHomeScrollY = 0;
+let restoreHomeScrollOnMount = false;
+
 export default function App() {
-  // Bio/contact/education/skills/etc. always come from the bundled data.js —
-  // instant, no fetch, no flash of an empty page on first visit. Only
-  // project cards + case-study content come from Firestore (see
-  // useProjects/useProjectDetails); projects falls back to data.js/
-  // projectDetailsData.js too if Firestore is disabled or unreachable. The
-  // Projects section shows its own skeleton while this is in flight instead
-  // of silently substituting the static list, so it's visibly fetching.
+  // Bio/contact/education/skills/resume/stats all come from one Firestore
+  // doc (about/main) via useAboutMe — instant on every render (served from
+  // a 5-min sessionStorage cache, or data.js, never a loading flag), with a
+  // background fetch silently swapping in fresher data when the cache is
+  // cold. Project cards + case-study content are a separate Firestore
+  // collection (see useProjects/useProjectDetails); projects falls back to
+  // data.js/projectDetailsData.js too if Firestore is disabled/unreachable.
+  // The Projects section shows its own skeleton while in flight instead of
+  // silently substituting the static list, so it's visibly fetching.
   const { projects, loading: projectsLoading } = useProjects();
-  const data = { ...staticData, projects };
+  const { data: aboutData } = useAboutMe();
+  const data = { ...aboutData, projects };
+
+  // Staged reveal: Hero is always instant (no skeleton — see Hero's own
+  // render below), About/Education/Experience/Certificates/Skills/Contact
+  // all gate on one `aboutReady` flag (About's profile image finishing
+  // download — the real bottleneck, since the text data is already
+  // present). Projects stays independently gated (its own fetch+skeleton,
+  // unchanged) since it's a genuinely separate, slower network call.
+  //
+  // These used to be staged further apart (Education, then Certificates+
+  // Skills+Contact once Education was ready) — measured via CDP scroll
+  // profiling that this caused real flicker: those extra gates meant
+  // Experience/Certificates/Skills (the sections furthest down the page)
+  // were the ones most likely to still be mid-skeleton-swap exactly when a
+  // normal scroll first reached them, and a skeleton→content swap whose
+  // height doesn't exactly match the real content shoves everything below
+  // it — a one-time layout-shift cost, confirmed by profiling (dropped
+  // frames only ever on a section's FIRST reveal, never on a revisit).
+  // Collapsing to one gate means this swap almost always finishes within
+  // ~1-2s of page load — well before a real scroll reaches that far — so
+  // nothing is still swapping by the time the user gets there.
+  //
+  // Once ready, stays ready — a one-way latch. Without this, the
+  // background cache-refresh swapping in a new (Firestore) image URL after
+  // the static one already preloaded would re-trigger useImagePreload's
+  // src-changed reset and flip `aboutReady` back to false, reverting every
+  // section back to a skeleton — exactly the "visual reload" this staging
+  // is meant to avoid.
+  const aboutImageReady = useImagePreload(data.images?.profile);
+  const [aboutReady, setAboutReady] = useState(false);
+  // React's documented "adjust state during render" pattern (not an effect,
+  // not a ref read) — a one-way latch: once true, stays true for the rest
+  // of this component's lifetime.
+  if (aboutImageReady && !aboutReady) {
+    setAboutReady(true);
+  }
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [resumeModalOpen, setResumeModalOpen] = useState(false);
@@ -56,6 +117,22 @@ export default function App() {
   };
 
   const currentView = location.pathname.startsWith('/projects/') ? 'detail' : 'home';
+
+  // Explicit scroll handling, now that native scroll restoration is off
+  // (see main.jsx): landing on '/' always starts at the top (Hero) UNLESS
+  // `restoreHomeScrollOnMount` says this is a genuine "Back to Projects"
+  // return (see the module-level comment above for why sessionStorage
+  // wouldn't work here — it can't distinguish that from a plain refresh).
+  useEffect(() => {
+    if (location.pathname !== '/') return;
+    window.scrollTo(0, restoreHomeScrollOnMount ? savedHomeScrollY : 0);
+  }, [location.pathname]);
+
+  const goToProject = (projectId) => {
+    savedHomeScrollY = window.scrollY;
+    restoreHomeScrollOnMount = false; // clear any stale pending-restore from a previous visit
+    navigate(`/projects/${projectId}`);
+  };
 
   // Contact form state and Formspree submission
   const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
@@ -120,60 +197,74 @@ export default function App() {
                 />
               </section>
 
-              <section id="about" className="py-24 border-t border-border-color/50 bg-bg-secondary/40">
-                <About
-                  aboutText={data.about}
-                  profileImg={data.images.profile}
-                  projectsCount={projectsLoading ? staticData.projects.length : data.projects.length}
-                />
-              </section>
+              <Reveal as="section" id="about" className="py-24 border-t border-border-color/50 bg-bg-secondary/40">
+                {aboutReady ? (
+                  <About
+                    aboutText={data.about}
+                    profileImg={data.images.profile}
+                    projectsCount={projectsLoading ? staticData.projects.length : data.projects.length}
+                    stats={data.stats}
+                  />
+                ) : (
+                  <AboutSkeleton />
+                )}
+              </Reveal>
 
-              <section id="projects" className="py-24 border-t border-border-color/50 bg-bg-tertiary/40">
+              <Reveal as="section" id="projects" className="py-24 border-t border-border-color/50 bg-bg-tertiary/40">
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
                   <Projects
                     projects={data.projects}
                     loading={projectsLoading}
-                    onSelectProject={(projectId) => navigate(`/projects/${projectId}`)}
+                    onSelectProject={goToProject}
                   />
                 </div>
-              </section>
+              </Reveal>
 
-              <section id="education" className="py-24 border-t border-border-color/50 bg-bg-secondary/40">
+              <Reveal as="section" id="education" className="py-24 border-t border-border-color/50 bg-bg-secondary/40">
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
-                  <Timeline
-                    title="Education"
-                    subtitle="My academic history and parameters."
-                    items={data.education}
-                  />
+                  {aboutReady ? (
+                    <Timeline
+                      title="Education"
+                      subtitle="My academic history and parameters."
+                      items={data.education}
+                    />
+                  ) : (
+                    <TimelineSkeleton rows={2} />
+                  )}
                 </div>
-              </section>
+              </Reveal>
 
-              <section id="experience" className="py-24 border-t border-border-color/50 bg-bg-tertiary/40">
+              <Reveal as="section" id="experience" className="py-24 border-t border-border-color/50 bg-bg-tertiary/40">
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
-                  <Timeline
-                    title="Experience"
-                    subtitle="My extracurricular design and hardware simulation tasks."
-                    items={data.experience}
-                  />
+                  {aboutReady ? (
+                    <Timeline
+                      title="Experience"
+                      subtitle="My extracurricular design and hardware simulation tasks."
+                      items={data.experience}
+                    />
+                  ) : (
+                    <TimelineSkeleton rows={2} />
+                  )}
                 </div>
-              </section>
+              </Reveal>
 
-              {data.certificates && data.certificates.length > 0 && (
-                <section id="certificates" className="py-24 border-t border-border-color/50 bg-bg-secondary/40">
+              {(!aboutReady || (data.certificates && data.certificates.length > 0)) && (
+                <Reveal as="section" id="certificates" className="py-24 border-t border-border-color/50 bg-bg-secondary/40">
                   <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
-                    <Certificates certificates={data.certificates} />
+                    {aboutReady ? <Certificates certificates={data.certificates} /> : <CertificatesSkeleton />}
                   </div>
-                </section>
+                </Reveal>
               )}
 
-              <section id="skills" className="py-24 border-t border-border-color/50 bg-bg-tertiary/40">
+              <Reveal as="section" id="skills" className="py-24 border-t border-border-color/50 bg-bg-tertiary/40">
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
-                  <Skills skills={data.skills} />
+                  {aboutReady ? <Skills skills={data.skills} /> : <SkillsSkeleton />}
                 </div>
-              </section>
+              </Reveal>
 
-              <section id="contact" className="py-24 border-t border-border-color/50 bg-bg-secondary/40">
+              <Reveal as="section" id="contact" className="py-24 border-t border-border-color/50 bg-bg-secondary/40">
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
+                  {!aboutReady ? <ContactSkeleton /> : (
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
                     <div className="space-y-6 text-left">
                       <h2 className="text-5xl font-extrabold tracking-tight leading-none text-text-primary">Let's work together.</h2>
@@ -263,8 +354,9 @@ export default function App() {
                       </form>
                     </div>
                   </div>
+                  )}
                 </div>
-              </section>
+              </Reveal>
             </div>
           } />
           <Route path="/projects/:projectId" element={<ProjectDetailWrapper />} />
@@ -335,10 +427,12 @@ function ProjectDetailLoader({ projectId }) {
 
   // Go back with real browser history (not a fresh push) whenever this entry
   // was reached via in-app navigation (location.key is 'default' only for a
-  // direct/deep link with no prior SPA history) — restores the home page's
-  // previous scroll position (the Projects section) via the browser's
-  // native scroll restoration, instead of landing back at the top.
+  // direct/deep link with no prior SPA history). Native scroll restoration
+  // is disabled globally (see main.jsx), so explicitly flag that the home
+  // route's effect should restore its saved scroll position instead of
+  // going to top — see the module-level comment near the top of this file.
   const goBack = () => {
+    restoreHomeScrollOnMount = true;
     if (location.key !== 'default') navigate(-1);
     else navigate('/');
   };
@@ -359,11 +453,13 @@ function ProjectDetailLoader({ projectId }) {
   }
 
   return (
-    <ProjectDetail
-      project={project}
-      details={details}
-      onBack={goBack}
-      animate={source !== 'cache'}
-    />
+    <Suspense fallback={<ProjectDetailSkeleton />}>
+      <ProjectDetail
+        project={project}
+        details={details}
+        onBack={goBack}
+        animate={source !== 'cache'}
+      />
+    </Suspense>
   );
 }

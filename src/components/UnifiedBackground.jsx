@@ -23,8 +23,18 @@ export const UnifiedBackground = () => {
     let scrollTimeout = null;
     const handleScroll = () => {
       el.classList.add('is-scrolling');
+      // Also flagged on <html> — index.css uses this to kill hover
+      // transitions site-wide while scrolling. With a stationary mouse,
+      // scrolling slides many hover-reactive elements (skill badges,
+      // timeline dots, card grids) under the cursor, each firing its own
+      // hover-enter/leave transition — that's what reads as "laggy scroll"
+      // over dense sections, not any single component being slow.
+      document.documentElement.classList.add('is-scrolling');
       if (scrollTimeout) clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(() => el.classList.remove('is-scrolling'), 160);
+      scrollTimeout = setTimeout(() => {
+        el.classList.remove('is-scrolling');
+        document.documentElement.classList.remove('is-scrolling');
+      }, 160);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });

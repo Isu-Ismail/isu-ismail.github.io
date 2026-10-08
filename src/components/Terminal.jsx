@@ -24,6 +24,14 @@ export const Terminal = ({ isOpen, onClose, data }) => {
     }
   }, [history]);
 
+  // Keep the page from scrolling behind the full-screen backdrop-blur overlay.
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleCommand = (cmdStr) => {

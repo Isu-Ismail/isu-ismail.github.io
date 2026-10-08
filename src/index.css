@@ -92,13 +92,13 @@
   --text-secondary: #475569;
   --text-muted: #64748b;
 
-  --primary: #c29f68;
-  /* Luxury Muted Gold */
-  --primary-hover: #a37b4c;
-  --primary-rgb: 194, 159, 104;
+  --primary: #e8690f;
+  /* Tech Amber/Orange */
+  --primary-hover: #c2560c;
+  --primary-rgb: 232, 105, 15;
 
   --border-color: #cbd5e1;
-  --border-focus: #c29f68;
+  --border-focus: #e8690f;
 
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
@@ -109,27 +109,27 @@
 }
 
 [data-theme="dark"] {
-  /* Dark Theme Colors - Luxury Obsidian, Graphite & Champagne Gold */
-  --bg-primary: #090a0f;
-  /* Obsidian Black */
-  --bg-secondary: #12131a;
-  /* Graphite Black */
-  --bg-tertiary: #191b24;
-  /* Rich Slate */
-  --bg-card: rgba(18, 19, 26, 0.65);
+  /* Dark Theme Colors - Terminal Obsidian & Amber */
+  --bg-primary: #09090c;
+  /* Near-black, slight blue cast */
+  --bg-secondary: #111318;
+  /* Panel/card surface */
+  --bg-tertiary: #181b22;
+  /* Raised surface */
+  --bg-card: rgba(17, 19, 24, 0.7);
 
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #8e9bb0;
+  --text-primary: #f1f5f9;
+  --text-secondary: #a8b3c4;
+  --text-muted: #6b7585;
 
-  --primary: #d4af37;
-  /* Brilliant Champagne Gold */
-  --primary-hover: #f3d078;
-  --primary-rgb: 212, 175, 55;
+  --primary: #ff8a3d;
+  /* Vivid tech amber */
+  --primary-hover: #ffab6b;
+  --primary-rgb: 255, 138, 61;
 
-  --border-color: #262933;
-  /* Slate/Obsidian Border */
-  --border-focus: #d4af37;
+  --border-color: #22252d;
+  /* Obsidian border */
+  --border-focus: #ff8a3d;
 
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.45), 0 10px 10px -5px rgba(0, 0, 0, 0.25);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
@@ -155,11 +155,20 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Skip painting off-screen sections — biggest scroll perf win */
-section {
-  content-visibility: auto;
-  contain-intrinsic-size: 0 600px;
-}
+/* content-visibility: auto was here to skip painting off-screen sections,
+   but measured (CDP scroll profiling, A/B with/without) that it was doing
+   the opposite on this page: the 600px contain-intrinsic-size placeholder
+   doesn't match several sections' real height, so the layout recalc that
+   happens when a section flips from "skipped" to "relevant" was landing
+   exactly mid-scroll, which is what read as "scroll slows down through
+   Experience/Certificates/Skills specifically" — confirmed by disabling it
+   and re-measuring: those sections dropped to zero dropped frames. With
+   only ~8 sections on this page, the offscreen-skip benefit content-
+   visibility targets (built for pages with hundreds of off-screen nodes)
+   isn't worth this tradeoff here. Removed rather than tuned (e.g. a
+   per-section accurate intrinsic-size) since the measured win from
+   removing it outright was unambiguous and simpler to keep correct as
+   content changes. */
 
 
 
@@ -231,4 +240,105 @@ section {
   background: radial-gradient(circle at center, rgba(var(--primary-rgb), 0.25) 0%, rgba(var(--primary-rgb), 0.08) 40%, transparent 70%);
   transform: translate3d(0, 0, 0);
   will-change: transform;
+}
+
+/* ---- Bold tech/dev visual primitives ---- */
+
+/* macOS/code-editor style window control dots, used for terminal-chrome
+   headers (project cards, carousel frame, arsenal panel). */
+.window-dots {
+  display: flex;
+  gap: 0.35rem;
+}
+.window-dots span {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  display: block;
+}
+.window-dots span:nth-child(1) { background: #ff5f56; }
+.window-dots span:nth-child(2) { background: #ffbd2e; }
+.window-dots span:nth-child(3) { background: #27c93f; }
+
+/* Small L-shaped corner brackets in the accent color — a common "tech UI"
+   framing device. Apply to a `relative` positioned container. */
+.corner-brackets::before,
+.corner-brackets::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--primary);
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+}
+.corner-brackets::before {
+  top: -1px;
+  left: -1px;
+  border-right: none;
+  border-bottom: none;
+}
+.corner-brackets::after {
+  bottom: -1px;
+  right: -1px;
+  border-left: none;
+  border-top: none;
+}
+.corner-brackets:hover::before,
+.corner-brackets:hover::after {
+  opacity: 1;
+}
+
+/* Scroll-reveal: paired with the useInView hook — sections start faded/
+   offset and settle into place once they enter the viewport. Respects
+   prefers-reduced-motion below. */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* With a stationary mouse, scrolling slides elements under the cursor —
+   every hover-reactive one fires its own enter/leave transition as it
+   passes by. Across a dense grid (skill badges, project tags, timeline
+   dots) that's dozens of simultaneous transitions, which is what reads as
+   "laggy scroll" even though no single element is doing anything expensive.
+   Instantly snapping hover state during scroll (no animation, not even
+   pointer-events removal) keeps hover functional but removes the
+   transition/repaint cost. Matches Tailwind's literal `hover:` prefix,
+   which Tailwind keeps as-is in the class attribute. */
+html.is-scrolling [class*="hover:"] {
+  transition: none !important;
+}
+
+/* The scroll-reveal's IntersectionObserver fires whenever a section crosses
+   its threshold — for a section near the top of the page that's usually
+   well before any scrolling happens, but for one further down (Experience,
+   Certificates, Skills — the first ones a fast scroll pass reaches that
+   weren't already near the initial viewport) it fires WHILE the user is
+   actively scrolling, so the 0.6s transform+opacity entrance transition
+   ends up compositing at the same time as the scroll itself. That overlap,
+   not any one section's own content, is what reads as "scroll slows down
+   through these sections specifically" — measured via CDP scroll profiling
+   that the sections themselves are otherwise clean once already revealed.
+   Same fix as the hover-during-scroll rule above: kill the transition
+   while actively scrolling so a newly-visible section snaps to its final
+   state instantly instead of animating, removing the compositing cost;
+   still-hidden sections reached after scroll settles (is-scrolling clears
+   ~160ms after the last scroll event) get the normal smooth entrance. */
+html.is-scrolling .reveal {
+  transition: none !important;
 }

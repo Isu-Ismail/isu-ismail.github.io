@@ -27,12 +27,35 @@
         <input type="text" id="name" />
         <label for="role">Role</label>
         <input type="text" id="role" />
-        <label for="resume">Resume path/URL</label>
-        <input type="text" id="resume" />
         <label for="about">About (long bio)</label>
         <textarea id="about"></textarea>
         <label for="hero_about">Hero About (short tagline)</label>
         <textarea id="hero_about"></textarea>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0">Resume</h2>
+        <p class="muted" style="margin:0 0 0.5rem">Uploading writes straight to Storage and fills the URL field below — Save still has to be clicked to publish it to <code class="hint">about/main</code>, which the live site reads directly (no caching on this field, so a Save shows up on the next page load).</p>
+
+        <label for="resume">Resume PDF — path/URL</label>
+        <div class="row">
+          <input type="text" id="resume" style="flex:1" />
+          <a id="resume-link" href="#" target="_blank" rel="noreferrer" style="display:none"><button type="button">Open</button></a>
+        </div>
+        <div class="row" style="margin-top:0.5rem">
+          <input type="file" id="resume-upload" accept="application/pdf" />
+          <span class="status" id="resume-upload-status"></span>
+        </div>
+
+        <label for="img-resume" style="margin-top:1.5rem">Resume preview image — path/URL</label>
+        <div class="thumb-grid" id="resume-img-thumb"></div>
+        <div class="row" style="margin-top:0.5rem">
+          <input type="text" id="img-resume" style="flex:1" />
+        </div>
+        <div class="row" style="margin-top:0.5rem">
+          <input type="file" id="resume-img-upload" accept="image/*" />
+          <span class="status" id="resume-img-upload-status"></span>
+        </div>
       </div>
 
       <div class="card">
@@ -41,8 +64,6 @@
         <input type="text" id="img-profile" />
         <label for="img-hero">Hero image path/URL</label>
         <input type="text" id="img-hero" />
-        <label for="img-resume">Resume preview image path/URL</label>
-        <input type="text" id="img-resume" />
       </div>
 
       <div class="card">
@@ -91,7 +112,7 @@
 
   <script type="module">
     import { requireAuth, logout } from "./js/auth.js";
-    import { getAboutMe, saveAboutMe } from "./js/about-api.js";
+    import { getAboutMe, saveAboutMe, uploadResumeFile } from "./js/about-api.js";
 
     requireAuth(() => {});
     document.getElementById("logout-btn").addEventListener("click", logout);
@@ -104,6 +125,20 @@
       statusEl.className = `status ${isErr ? "err" : "ok"}`;
     }
 
+    function renderResumePreview() {
+      const resumeUrl = $("resume").value.trim();
+      const link = $("resume-link");
+      if (resumeUrl) {
+        link.href = resumeUrl;
+        link.style.display = "";
+      } else {
+        link.style.display = "none";
+      }
+
+      const imgUrl = $("img-resume").value.trim();
+      $("resume-img-thumb").innerHTML = imgUrl ? `<img src="${imgUrl}" />` : "";
+    }
+
     function fill(data) {
       $("name").value = data.name || "";
       $("role").value = data.role || "";
@@ -113,6 +148,7 @@
       $("img-profile").value = data.images?.profile || "";
       $("img-hero").value = data.images?.hero || "";
       $("img-resume").value = data.images?.resume_image || "";
+      renderResumePreview();
       $("contact-email").value = data.contact?.email || "";
       $("contact-phone").value = data.contact?.phone || "";
       $("contact-location").value = data.contact?.location || "";
@@ -149,6 +185,36 @@
     }
 
     $("reload-btn").addEventListener("click", load);
+
+    $("resume-upload").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      $("resume-upload-status").textContent = "Uploading…";
+      try {
+        const url = await uploadResumeFile(file);
+        $("resume").value = url;
+        renderResumePreview();
+        $("resume-upload-status").textContent = "Uploaded — click Save to publish.";
+      } catch (err) {
+        $("resume-upload-status").textContent = err.message || "Upload failed.";
+      }
+      e.target.value = "";
+    });
+
+    $("resume-img-upload").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      $("resume-img-upload-status").textContent = "Uploading…";
+      try {
+        const url = await uploadResumeFile(file);
+        $("img-resume").value = url;
+        renderResumePreview();
+        $("resume-img-upload-status").textContent = "Uploaded — click Save to publish.";
+      } catch (err) {
+        $("resume-img-upload-status").textContent = err.message || "Upload failed.";
+      }
+      e.target.value = "";
+    });
 
     document.getElementById("about-form").addEventListener("submit", async (e) => {
       e.preventDefault();

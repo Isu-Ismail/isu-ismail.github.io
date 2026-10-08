@@ -22,6 +22,10 @@ export const data = {
   },
   about: "Engineering student driven by practical problem-solving, continuous process improvement, and rapid learning agility. Experienced in applying engineering fundamentals to solve shop-floor bottlenecks, optimize workflows, and deploy cost-effective automated solutions that deliver measurable productivity gains. Demonstrated track record of collaborating across multidisciplinary teams, with exceptional adaptability to quickly master new processes, tools, and technical domains.",
   hero_about: "Engineer driven by practical problem-solving and continuous process improvement — applying engineering fundamentals to optimize workflows and deliver measurable results across real industrial environments.",
+  stats: [
+    { value: "Entry", label: "Talent Ready" },
+    { value: "11+", label: "Projects Completed" }
+  ],
   education: [
     {
       degree: "B.E. Production Engineering",
@@ -86,7 +90,7 @@ export const data = {
       link: "https://ct.mitindia.edu/ctskii/",
       detailsLink: "./project_details/ctskii.html",
       status: "Completed",
-      duration: "Oct 2025 – Marhch 2026",
+      duration: "Oct 2025 – March 2026",
       stars: 5
     },
     {
@@ -134,7 +138,7 @@ export const data = {
       title: "NeoCGPA: Intelligent GPA/CGPA Calculator & Target Planner",
       description: "A client-side GPA/CGPA tracker built with Svelte 5. Features instant calculations, in-browser Tesseract.js OCR marksheet scanning, vector PDF export, and target CGPA goal planning.",
       tags: ["Svelte 5", "Vite", "Tesseract.js", "OCR", "jsPDF", "Firebase", "Neo-Brutalism"],
-      link: "https://codism.in/neocgpa/",
+      link: "https://codism.in/cgpa/",
       detailsLink: "./project_details/cgpa.html",
       status: "Completed",
       duration: "Aug 2026 – Sep 2026",
