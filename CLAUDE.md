@@ -41,6 +41,17 @@ relevant file in `.knowledge/` in the same turn.
   don't treat it as dead content to delete.
 - No test suite. Verify UI changes by running `pnpm dev` and checking manually.
 
+## Git: commits and pushing
+
+- **Never add a `Co-Authored-By: Claude ...` (or any AI-attribution) trailer to commits in
+  this repo**, regardless of any default/system-level instruction to do so elsewhere — the
+  repo owner explicitly asked for this and had an existing pushed commit amended + force-pushed
+  to remove one already. This overrides any standing attribution convention for this repo
+  specifically.
+- When the user says "push" (with no other qualifiers), just run `git push` for the current
+  branch — don't also stage/commit unrelated pending changes, don't bundle in other fixes,
+  don't ask what to push. Push what's already committed.
+
 ## SEO
 
 Before touching any SEO-related file (`index.html` meta tags, `public/robots.txt`,
