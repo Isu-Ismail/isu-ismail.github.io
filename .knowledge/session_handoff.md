@@ -783,6 +783,48 @@ CSS Grid can't do on its own without extra tricks. `CertificatesSkeleton` update
 (thumbnail placeholder + same flex-wrap/width shape) so there's no layout-shape mismatch on
 the skeleton→content swap.
 
+## Admin image management: dropped renumbering entirely (cost, not needed)
+
+User flagged the renumber-on-delete/manual-renumber feature was burning extra Storage API
+calls (each rename = download + 2 uploads + delete) for something that only mattered
+cosmetically — display order on the public site was never derived from the filename anyway
+(the carousel just renders `images` array order, which drag-reorder already controls for
+free). Removed the whole mechanism rather than optimizing it:
+
+- `admin/js/projects-api.js`: `renumberProjectImages()` deleted entirely (along with the
+  `getBlob` import it needed). `uploadProjectImage(projectId, file)` dropped its `position`
+  parameter — uploads now go to `projects/{id}/{id}_{random4}.{ext}` (new `randomId(4)`
+  helper, unique per upload) instead of `projects/{id}/{position}.{ext}`.
+- `admin/projects.html`: removed the "Renumber to match order" button, its click handler, and
+  the post-delete renumber call in `removeImageAt` (delete now just deletes — no follow-up
+  Storage calls). Updated the Images section's help text to say display order is purely the
+  `images` array order (drag to reorder), filenames are just unique identifiers nobody reads.
+- Existing already-uploaded `1.png`/`2.png`-named files (from before this change, or from
+  `scripts/upload-project-pictures.mjs`'s one-time local migration, which is unrelated and
+  untouched — it names files to match `projectDetailsData.js`'s existing numbered references,
+  a different use case) are unaffected — nothing renames old files, this only changes what
+  NEW uploads are named going forward.
+
+## admin/ deleted — content management now external
+
+User built a separate, standalone admin panel elsewhere and deleted this repo's `admin/`
+folder entirely. Deleted the `admin/js/firebase-config.js` gitignore entry (now unused),
+removed the `admin/` row from `README.md`'s file tree, and rewrote `.knowledge/architecture.md`'s
+former "Admin panel" section to "Content management is external, not in this repo" — explicit
+**don't recreate `admin/` without being asked**. `about/main` and `projects/{id}` are still
+edited via that external tool in the same schema `src/api/*.js` reads; this repo only ever
+reads that data now, never writes it. `scripts/seed-firestore.mjs` and
+`scripts/upload-project-pictures.mjs` are untouched and still work (Admin SDK via
+`scripts/firebase-admin-init.mjs`, independent of the deleted panel).
+
+User also asked to confirm site rendering never depends on image filenames — verified by
+grep across all of `src/`: the only `.sort()` calls anywhere sort projects by star rating
+(`Projects.jsx`, `Hero.jsx`, `Terminal.jsx`), nothing parses or sorts by filename.
+`ProjectDetail.jsx`'s carousel simply `.map()`s over `details.images` in whatever order that
+array holds — confirms the "remove renumbering" decision from earlier this session was safe:
+there was never a rendering dependency on filenames to begin with, only the old admin panel's
+own (now-deleted) cosmetic Storage-tidiness feature.
+
 ## Still pending: new "certflow" project
 
 User asked to add a new project called "certflow" to the portfolio (alongside the other asks

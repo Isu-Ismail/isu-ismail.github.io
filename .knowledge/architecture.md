@@ -89,15 +89,14 @@ The deploy workflow has no `VITE_FIREBASE_*` env step — even with a local `.en
 CI build currently ships with Firestore disabled (static fallback only) unless those are added
 as repo secrets and wired into the `Build Production Bundle` step.
 
-## Admin panel (`admin/`)
+## Content management is external, not in this repo
 
-Separate, NOT part of the Vite build or the deploy workflow (confirmed: never appears in
-`dist/`, never copied by `deploy.yml`) — plain static HTML + ES modules, served locally via
-`python admin/serve.py` purely so browser ES module imports work over `http://` (they're
-blocked from `file://`). Loads the Firebase modular SDK straight from
-`gstatic.com/firebasejs/<version>/...` (pin matches `node_modules/firebase`'s version) since
-there's no bundler here. Talks directly to Firestore/Storage/Auth from the browser — writes
-`about/main` and `projects/{id}` in the same shape `src/api/*.js` reads. Gated by Firebase Auth
-email/password (one user, created manually in Firebase Console); see `admin/README.md` for
-full setup including sample Firestore/Storage security rules. Not wired into CI; run it only
-locally.
+There used to be a local static admin panel at `admin/` (plain HTML/ES modules, Firebase Auth-
+gated, wrote directly to Firestore/Storage) — the user built a separate admin panel elsewhere
+and deleted this repo's `admin/` folder entirely. **Don't recreate it without being asked.**
+`about/main` and `projects/{id}` are still edited via that external tool, in the same schema
+`src/api/*.js` reads (see "Data layer" above) — this repo only ever reads that data, never
+writes it. If `scripts/seed-firestore.mjs` or `scripts/upload-project-pictures.mjs` are needed
+again (re-seeding from `data.js`, or the one-time local-image migration), they're still here
+and still use the Admin SDK (`scripts/firebase-admin-init.mjs`) independent of the deleted
+admin panel.

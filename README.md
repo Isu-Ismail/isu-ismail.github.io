@@ -24,8 +24,6 @@ port/
 │   ├── hooks/                # useAboutMe, useProjects, useProjectDetails
 │   └── components/          # Hero, Projects, About, Skills, Timeline, Certificates,
 │                             # ProjectDetail, Navbar, Terminal, ResumeModal, backgrounds
-├── admin/                  # local-only static admin panel (writes to Firestore/Storage
-│                            # directly) — see admin/README.md; not part of the Vite build
 ├── scripts/seed-firestore.mjs  # pushes data.js + projectDetailsData.js into Firestore once
 ├── public/                 # static assets copied as-is into the build (robots.txt,
 │                            # sitemap.xml, og-image.png, favicon.svg, 404.html)

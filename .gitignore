@@ -12,7 +12,6 @@ dist
 dist-ssr
 *.local
 .env
-admin/js/firebase-config.js
 scripts/serviceAccountKey.json
 
 # Editor directories and files

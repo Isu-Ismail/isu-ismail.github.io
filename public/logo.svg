@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+    <defs>
+        <linearGradient id="gradBg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#111318"/>
+            <stop offset="100%" stop-color="#09090c"/>
+        </linearGradient>
+        <linearGradient id="gradGold" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffab6b"/>
+            <stop offset="50%" stop-color="#ff8a3d"/>
+            <stop offset="100%" stop-color="#c2560c"/>
+        </linearGradient>
+    </defs>
+    
+    <!-- Background Card -->
+    <rect width="120" height="120" rx="32" fill="url(#gradBg)"/>
+    
+    <!-- Gold Border Ring -->
+    <rect x="6" y="6" width="108" height="108" rx="26" fill="none" stroke="url(#gradGold)" stroke-width="2.5" opacity="0.8"/>
+    
+    <!-- Lowercase "i" (Dot & Stem) -->
+    <!-- The Dot -->
+    <circle cx="60" cy="38" r="8" fill="url(#gradGold)"/>
+    
+    <!-- The Stem (Line below the dot) -->
+    <rect x="53" y="54" width="14" height="34" rx="7" fill="url(#gradGold)"/>
+</svg>
