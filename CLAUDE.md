@@ -33,12 +33,22 @@ relevant file in `.knowledge/` in the same turn.
 - Live domain is `codism.in`, configured via GitHub repo Settings → Pages, NOT via a committed
   `CNAME` file (there isn't one, and that's correct — don't add one without checking it
   doesn't conflict with the Settings-level config).
-- `games/`, `project_pictures/`, `assets/` are referenced by relative/absolute path at
-  runtime, not imported by Vite/React — they're copied into the deploy output by the GitHub
-  Actions workflow's explicit `cp -r` steps, not Vite's bundler. If you add a new folder like
-  this, add a matching `cp -r` line in `.github/workflows/deploy.yml`.
-- `new_projects/` holds draft notes for projects not yet wired into `projectDetailsData.js` —
-  don't treat it as dead content to delete.
+- `games/` is referenced by relative/absolute path at runtime, not imported by Vite/React —
+  it's copied into the deploy output by the GitHub Actions workflow's explicit `cp -r` step,
+  not Vite's bundler. If you add a new folder like this, add a matching `cp -r` line in
+  `.github/workflows/deploy.yml`.
+- All real content (bio, contact, education, experience, skills, certificates, projects,
+  case-study detail) lives in Firestore (`about/main` doc + `projects/{id}` collection),
+  managed by an external admin panel not in this repo. There is no local static fallback —
+  `src/api/about.js` and `src/api/projects.js` return an empty-safe shape if Firestore is
+  unreachable, they don't read from a bundled file.
+- `datas/` is an **archive**, not live code: old `data.js`, `projectDetailsData.js`,
+  `assets/`, `project_pictures/` moved here when the site went Firestore-only. Nothing in
+  `src/` imports from it except the one-off migration scripts in `scripts/`. Don't restore
+  imports from it into app code, and don't delete it without asking — it's the historical
+  seed data.
+- `new_projects/` holds draft notes for projects not yet wired into Firestore — don't treat
+  it as dead content to delete.
 - No test suite. Verify UI changes by running `pnpm dev` and checking manually.
 
 ## Git: commits and pushing

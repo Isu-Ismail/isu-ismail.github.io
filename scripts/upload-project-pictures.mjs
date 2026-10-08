@@ -12,7 +12,7 @@
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { db, bucket, publicDownloadUrl } from './firebase-admin-init.mjs';
-import { projectDetailsData } from '../src/projectDetailsData.js';
+import { projectDetailsData } from '../datas/projectDetailsData.js';
 
 const CONTENT_TYPES = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', gif: 'image/gif' };
 
@@ -23,7 +23,7 @@ function contentTypeFor(filePath) {
 
 // relPath like "./project_pictures/ctskii/1.png" -> repo-root-relative disk path
 function toDiskPath(relPath) {
-  return fileURLToPath(new URL(`../${relPath.replace(/^\.\//, '')}`, import.meta.url));
+  return fileURLToPath(new URL(`../datas/${relPath.replace(/^\.\//, '')}`, import.meta.url));
 }
 
 async function uploadOne(id, relPath) {

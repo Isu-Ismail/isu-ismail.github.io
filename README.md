@@ -15,23 +15,24 @@ automation projects). Live at [codism.in](https://codism.in).
 ```
 port/
 ├── index.html              # SPA entry — title/meta/OG/JSON-LD all live here (see SEO note)
-├── data.js                 # site owner's bio/contact/education/experience content
 ├── src/
 │   ├── App.jsx              # routes: "/" (home) and "/projects/:projectId" (detail pages)
-│   ├── projectDetailsData.js  # per-project detail content, keyed by project id (static fallback)
 │   ├── firebase.js          # lazy Firestore client, gated on VITE_FIREBASE_* env vars
-│   ├── api/                 # about.js, projects.js — Firestore reads with data.js fallback
+│   ├── api/                 # about.js, projects.js — Firestore reads, no local fallback
 │   ├── hooks/                # useAboutMe, useProjects, useProjectDetails
 │   └── components/          # Hero, Projects, About, Skills, Timeline, Certificates,
 │                             # ProjectDetail, Navbar, Terminal, ResumeModal, backgrounds
-├── scripts/seed-firestore.mjs  # pushes data.js + projectDetailsData.js into Firestore once
+├── scripts/seed-firestore.mjs  # one-off: pushes datas/data.js + datas/projectDetailsData.js
+│                                # into Firestore (not part of the live app)
 ├── public/                 # static assets copied as-is into the build (robots.txt,
-│                            # sitemap.xml, og-image.png, favicon.svg, 404.html)
-├── project_pictures/       # per-project screenshot folders, referenced by projectDetailsData.js
-├── assets/                 # resume PDF, profile/hero images referenced by data.js
+│                            # sitemap.xml, og-image.png, favicon.svg, 404.html, logo.svg)
+├── datas/                  # ARCHIVE, not live code — old data.js, projectDetailsData.js,
+│                            # assets/ (resume PDF, profile/hero images), project_pictures/
+│                            # (per-project screenshots). Only scripts/ still reads from it,
+│                            # for one-off Firestore seeding. All live content is in Firestore.
 ├── games/                  # standalone HTML mini-games (dino/pacman/snake/tetris) linked
 │                            # from the site, not part of the React app
-├── new_projects/           # draft README notes for projects not yet added to the site
+├── new_projects/           # draft README notes for projects not yet added to Firestore
 └── overleaf/                # (empty / LaTeX resume source, not part of the deployed site)
 ```
 
@@ -56,8 +57,8 @@ pnpm lint
 ## Deploy
 
 `.github/workflows/deploy.yml` builds on every push to `main`, then copies `dist/` plus
-`assets/`, `project_pictures/`, and `games/` (referenced by relative paths at runtime, not
-bundled by Vite) into a `deploy_out/` folder, and pushes that to the `publish` branch via
+`games/` (referenced by relative paths at runtime, not bundled by Vite) into a `deploy_out/`
+folder, and pushes that to the `publish` branch via
 `JamesIves/github-pages-deploy-action`. GitHub Pages serves `publish` at the custom domain
 `codism.in` (configured in repo Settings, not via a committed `CNAME` file). `public/`
 contents (`robots.txt`, `sitemap.xml`, `og-image.png`, etc.) are copied into `dist/`

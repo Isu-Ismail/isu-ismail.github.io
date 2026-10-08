@@ -37,8 +37,6 @@ jobs:
           mkdir deploy_out
           cp -r dist/* deploy_out/
           # Copy static folders to deploy_out so all relative paths resolve correctly
-          cp -r assets deploy_out/ || true
-          cp -r project_pictures deploy_out/ || true
           cp -r games deploy_out/ || true
 
       - name: Push Bundle to publish Branch

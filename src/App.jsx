@@ -1,8 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router-dom';
-import { data as staticData } from '../data.js';
 import { useProjects } from './hooks/useProjects';
 import { useAboutMe } from './hooks/useAboutMe';
+import { emptyAboutMe } from './api/about';
 import { useImagePreload } from './hooks/useImagePreload';
 import { useProjectDetails } from './hooks/useProjectDetails';
 import { Navbar } from './components/Navbar';
@@ -54,17 +54,19 @@ let restoreHomeScrollOnMount = false;
 
 export default function App() {
   // Bio/contact/education/skills/resume/stats all come from one Firestore
-  // doc (about/main) via useAboutMe — instant on every render (served from
-  // a 5-min sessionStorage cache, or data.js, never a loading flag), with a
-  // background fetch silently swapping in fresher data when the cache is
-  // cold. Project cards + case-study content are a separate Firestore
-  // collection (see useProjects/useProjectDetails); projects falls back to
-  // data.js/projectDetailsData.js too if Firestore is disabled/unreachable.
-  // The Projects section shows its own skeleton while in flight instead of
-  // silently substituting the static list, so it's visibly fetching.
+  // doc (about/main) via useAboutMe — no local static fallback (content is
+  // fully managed by an external admin panel now; see
+  // .knowledge/architecture.md). Served from a 30s sessionStorage cache
+  // when fresh, always refetched on route changes. Project cards +
+  // case-study content are a separate Firestore collection (see
+  // useProjects/useProjectDetails) — same deal, no local fallback.
   const { projects, loading: projectsLoading } = useProjects();
   const { data: aboutData } = useAboutMe();
-  const data = { ...aboutData, projects };
+  // Merge over the empty-safe shape (not hardcoded content — just a
+  // complete-but-blank object) so nothing downstream ever destructures
+  // `undefined` while Firestore's fetch is still in flight — there's no
+  // local static fallback to instantly fill this anymore.
+  const data = { ...emptyAboutMe(), ...aboutData, projects };
 
   // Staged reveal: Hero is always instant (no skeleton — see Hero's own
   // render below), About/Education/Experience/Certificates/Skills/Contact
@@ -202,7 +204,7 @@ export default function App() {
                   <About
                     aboutText={data.about}
                     profileImg={data.images.profile}
-                    projectsCount={projectsLoading ? staticData.projects.length : data.projects.length}
+                    projectsCount={data.projects.length}
                     stats={data.stats}
                   />
                 ) : (

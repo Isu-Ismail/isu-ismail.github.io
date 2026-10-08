@@ -1,16 +1,30 @@
 import { fetchDoc } from '../firebase';
 import { cacheGet, cacheSet } from './cache';
-import { data as staticData } from '../../data.js';
 
 const CACHE_KEY = 'about:main';
-const CACHE_TTL_MS = 30 * 1000; // 30 seconds (reduced per user requirement)
+const CACHE_TTL_MS = 30 * 1000; // 30 seconds
 
-// Everything in data.js except `projects` (that's its own collection/fetch —
-// see api/projects.js) — the synchronous, always-available fallback.
-export function localAboutMe() {
-  const rest = { ...staticData };
-  delete rest.projects;
-  return rest;
+// No hardcoded personal content here — if Firestore is unreachable there is
+// genuinely nothing to show but an empty/safe shape, so the rest of the app
+// doesn't crash destructuring `data.contact.email` etc. All real content
+// lives in Firestore `about/main` now, managed by an external admin panel.
+export function emptyAboutMe() {
+  return {
+    name: '',
+    role: '',
+    resume: '',
+    images: { profile: '', hero: '', resume_image: '' },
+    contact: { email: '', phone: '', location: '', github: '', linkedin: '', instagram: '' },
+    about: '',
+    hero_about: '',
+    education: [],
+    experience: [],
+    skills: [],
+    interests: [],
+    certificates: [],
+    stats: [],
+    gamePath: [],
+  };
 }
 
 // Synchronous cache-only lookup for a lazy useState initializer — lets the
@@ -21,8 +35,8 @@ export function getCachedAboutMe() {
 
 /**
  * GET about/main — name, role, bio, hero tagline, contact, education,
- * experience, skills, skillCards, interests, certificates, stats, resume + images.
- * Cached in sessionStorage for 30s. Set force: true to bypass cache.
+ * experience, skills, interests, certificates, stats, resume + images.
+ * Cached in sessionStorage for 30s. Set force: true to bypass the cache.
  */
 export async function getAboutMe({ force = false } = {}) {
   if (!force) {
@@ -37,7 +51,7 @@ export async function getAboutMe({ force = false } = {}) {
       return { data: remote, source: 'firestore' };
     }
   } catch (err) {
-    return { data: localAboutMe(), source: 'static-fallback', error: err };
+    return { data: emptyAboutMe(), source: 'error', error: err };
   }
-  return { data: localAboutMe(), source: 'static' };
+  return { data: emptyAboutMe(), source: 'empty' };
 }

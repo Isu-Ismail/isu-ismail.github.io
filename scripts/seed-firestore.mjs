@@ -13,8 +13,8 @@
 // Usage: node scripts/seed-firestore.mjs
 
 import { db } from './firebase-admin-init.mjs';
-import { data } from '../data.js';
-import { projectDetailsData } from '../src/projectDetailsData.js';
+import { data } from '../datas/data.js';
+import { projectDetailsData } from '../datas/projectDetailsData.js';
 import { getProjectId } from '../src/utils.js';
 
 const { projects, ...aboutMe } = data;
