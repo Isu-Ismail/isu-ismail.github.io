@@ -258,7 +258,7 @@ export default function App() {
 
               <Reveal as="section" id="skills" className="py-24 border-t border-border-color/50 bg-bg-tertiary/40">
                 <div className="max-w-6xl mx-auto px-6 md:px-16 w-full">
-                  {aboutReady ? <Skills skills={data.skills} /> : <SkillsSkeleton />}
+                  {aboutReady ? <Skills skills={data.skills} skillCards={data.skillCards} /> : <SkillsSkeleton />}
                 </div>
               </Reveal>
 

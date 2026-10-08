@@ -1,36 +1,48 @@
-import { Cpu, Server, Layers, Settings } from 'lucide-react';
+import { Cpu, Server, Layers, Settings, Database, Terminal, Shield } from 'lucide-react';
 import { slugifyTitle } from '../utils';
 
-export const Skills = ({ skills }) => {
-  // Categorize skills based on names
-  const categories = [
-    {
-      title: "Systems & DevOps",
-      icon: <Server size={20} />,
-      items: ["Docker", "Docker Swarm", "NGINX", "Pocketbase", "Prometheus", "Grafana", "JupyterHub", "GlusterFS", "Git", "XAMPP", "FireBase"]
-    },
-    {
-      title: "Software & Protocols",
-      icon: <Cpu size={20} />,
-      items: ["Python", "FastAPI", "React", "Flutter", "Arduino", "MQTT"]
-    },
-    {
-      title: "CAD/CAE Engineering",
-      icon: <Layers size={20} />,
-      items: ["SolidWorks", "Creo", "NX CAD", "CATIA", "Abaqus CAE"]
-    }
-  ];
+const getCategoryIcon = (title = '') => {
+  const lower = title.toLowerCase();
+  if (lower.includes('devops') || lower.includes('server') || lower.includes('cloud') || lower.includes('system') || lower.includes('infra')) {
+    return <Server size={20} />;
+  }
+  if (lower.includes('software') || lower.includes('protocol') || lower.includes('code') || lower.includes('program') || lower.includes('app')) {
+    return <Cpu size={20} />;
+  }
+  if (lower.includes('cad') || lower.includes('cae') || lower.includes('design') || lower.includes('mechanical') || lower.includes('layer') || lower.includes('model')) {
+    return <Layers size={20} />;
+  }
+  if (lower.includes('data') || lower.includes('database') || lower.includes('sql') || lower.includes('storage')) {
+    return <Database size={20} />;
+  }
+  if (lower.includes('terminal') || lower.includes('cli') || lower.includes('shell')) {
+    return <Terminal size={20} />;
+  }
+  if (lower.includes('security') || lower.includes('auth')) {
+    return <Shield size={20} />;
+  }
+  return <Settings size={20} />;
+};
 
-  // Map any remaining skills that don't fit
-  const categorizedSkillNames = new Set(categories.flatMap(c => c.items));
-  const otherSkills = skills.filter(s => !categorizedSkillNames.has(s));
+export const Skills = ({ skills = [], skillCards = [] }) => {
+  // Dynamically resolve categories from Firebase skillCards
+  let categories = [];
 
-  if (otherSkills.length > 0) {
-    categories.push({
-      title: "Specialized Know-how",
-      icon: <Settings size={20} />,
-      items: otherSkills
-    });
+  if (Array.isArray(skillCards) && skillCards.length > 0) {
+    categories = skillCards.map((card) => ({
+      title: card.title || 'Technical Skills',
+      icon: getCategoryIcon(card.title),
+      items: Array.isArray(card.items) ? card.items : []
+    }));
+  } else if (Array.isArray(skills) && skills.length > 0) {
+    // Fallback if only a flat array of skills exists
+    categories = [
+      {
+        title: "Technical Skills",
+        icon: <Cpu size={20} />,
+        items: skills
+      }
+    ];
   }
 
   return (

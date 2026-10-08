@@ -825,20 +825,48 @@ array holds — confirms the "remove renumbering" decision from earlier this ses
 there was never a rendering dependency on filenames to begin with, only the old admin panel's
 own (now-deleted) cosmetic Storage-tidiness feature.
 
-## Still pending: new "certflow" project
+## Projects list: dropped the 30-min cache, fixed a detailsLink gate bug
 
-User asked to add a new project called "certflow" to the portfolio (alongside the other asks
-above, all of which are done). Unlike everything else this turn, this needs real project
-details only the user has (title wording, description, tech tags, live/repo link, status,
-duration, star rating, and ideally case-study content: subtitle, metrics, screenshots,
-narrative sections, tech specs) — nothing in the repo (`new_projects/`, git history, existing
-data) mentions it. Asked the user for these rather than inventing claims about a project they
-actually built. **Next agent: if the user has provided these details in a later message, add
-the project to BOTH `data.js` (`projects` array — the local fallback) AND seed it into
-Firestore's `projects/{id}` collection (either manually or by re-running
-`scripts/seed-firestore.mjs`, which re-seeds everything from `data.js`); if it has a
-case-study page, also add it to `src/projectDetailsData.js` first so the seed script picks up
-its detail fields too.**
+User added a new project ("certflow") via their new external admin panel and it wasn't
+showing on the home page. Verified directly against Firestore (Admin SDK, not a guess) —
+**the doc was there** (12 projects, certflow present with full card + case-study fields
+correctly populated, same image-naming convention this session's admin work established:
+`projects/certflow/certflow_{random4}.webp`). So the actual cause was the 30-minute
+sessionStorage cache in `src/api/projects.js` serving the stale 11-project list.
+
+Given this is the second time a cache hid an admin edit (about/resume had the identical issue
+earlier), dropped Firestore caching for projects ENTIRELY — removed `cache.js` usage from
+`src/api/projects.js` (`listProjects()`/`getProjectDetails()` now always fetch fresh, no
+`getCachedProjects`/`getCachedProjectDetails` exports), and reverted `useProjects.js`/
+`useProjectDetails.js` to the simple always-fetch-on-mount pattern (no lazy cache-check
+initializer). `src/api/cache.js` itself is untouched and still used by `about.js` (5-min cache,
+user hasn't complained about that one) — only the projects cache was the problem.
+
+**Also found and fixed, while verifying the certflow doc's shape**: it has no `detailsLink`
+field at all — the new external admin panel doesn't write one. `Projects.jsx`'s
+`getProjectAlias()` used `detailsLink`'s mere presence as the sole signal for "does this
+project have a case-study page" — without it, clicking the certflow card would have opened the
+external `link` instead of the detail page, despite the doc having full `narratives`/`metrics`/
+`images` content. Fixed the gate to also recognize detail content directly
+(`Boolean(project.detailsLink) || Boolean(project.narratives?.length)`) — covers both the
+static-fallback case (has `detailsLink`, no inline `narratives` on the list item) and
+Firestore-sourced projects that skip `detailsLink` but carry full content inline (list items
+are the whole merged doc, no second fetch needed to check this).
+
+## Skills/Arsenal: dynamic Firestore fetch & skillCards synchronization
+
+- Removed constant, hardcoded category items in `Skills.jsx`.
+- `Skills.jsx` now dynamically renders categories from `skillCards` received from `about/main` via `useAboutMe()`.
+- Dynamically derives icons for category cards (`Server`, `Cpu`, `Layers`, `Database`, `Terminal`, `Shield`, `Settings`) based on title keywords.
+- `App.jsx` forwards `skillCards={data.skillCards}` to `<Skills />`.
+- `data.js` includes default `skillCards` mirroring the canonical categories so static fallback matches 1:1.
+
+## Cache TTL reduction & on-navigation refetching
+
+- `src/api/about.js`: Reduced `CACHE_TTL_MS` from 5 minutes (300s) down to 30 seconds (`30 * 1000`).
+- Added `{ force: true }` parameter to `getAboutMe()` to bypass cache on demand and store fresh Firestore data.
+- `src/hooks/useAboutMe.js`: Now triggers a forced background refetch on every page navigation (`location.pathname` dependency).
+- `src/hooks/useProjects.js`: Now also refetches projects list on page navigation (`location.pathname` dependency).
 
 ## How to use this file
 

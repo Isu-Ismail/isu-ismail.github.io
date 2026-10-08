@@ -2,24 +2,8 @@ import { fetchDoc, fetchCollection } from '../firebase';
 import { data as staticData } from '../../data.js';
 import { projectDetailsData } from '../projectDetailsData.js';
 import { getProjectId } from '../utils';
-import { cacheGet, cacheSet } from './cache';
 
 const COLLECTION = 'projects';
-const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes, cleared early if the tab closes
-const LIST_CACHE_KEY = 'projects:list';
-
-// Synchronous cache-only lookups — let callers (useProjects'/
-// useProjectDetails' lazy initial state) check for a fresh cache hit before
-// the first paint, so cached data never flashes a loading skeleton.
-export function getCachedProjects() {
-  const cached = cacheGet(LIST_CACHE_KEY);
-  return cached ? { ...cached, source: 'cache' } : null;
-}
-
-export function getCachedProjectDetails(id) {
-  const cached = cacheGet(`project:${id}`);
-  return cached ? { ...cached, source: 'cache' } : null;
-}
 
 function localProjectsList() {
   return staticData.projects.map((p) => ({ id: getProjectId(p), ...p }));
@@ -37,20 +21,16 @@ function localProjectDetails(id) {
  * duration, stars...). Each returned project carries its stable `id`, used
  * both as the /projects/:id route param and the Firestore doc id. Falls back
  * to the bundled data.js when Firestore is disabled, empty, or unreachable.
- * Successful Firestore reads are cached in sessionStorage for 30 minutes
- * (see api/cache.js) — a static/fallback result is never cached.
+ *
+ * No caching — projects are managed via an external admin panel and edits
+ * should show up on the next load, not up to 30 minutes later. (This used
+ * to cache for 30 minutes; dropped after a newly-added project didn't show
+ * up because of it — same reasoning as about/resume never caching.)
  */
 export async function listProjects() {
-  const cached = getCachedProjects();
-  if (cached) return cached;
-
   try {
     const remote = await fetchCollection(COLLECTION);
-    if (remote.length > 0) {
-      const result = { projects: remote, source: 'firestore' };
-      cacheSet(LIST_CACHE_KEY, result, CACHE_TTL_MS);
-      return result;
-    }
+    if (remote.length > 0) return { projects: remote, source: 'firestore' };
   } catch (err) {
     return { projects: localProjectsList(), source: 'static-fallback', error: err };
   }
@@ -64,26 +44,18 @@ export async function listProjects() {
  * certificate). Firestore stores both merged in one `projects/{id}` doc;
  * this splits them back into { project, details } to match the shape
  * `ProjectDetail.jsx` expects. Falls back to data.js + projectDetailsData.js.
- *
- * Successful Firestore reads are cached per-id in sessionStorage for 30
- * minutes (see api/cache.js) — a static/fallback result is never cached, so
- * a transient Firestore hiccup can't get "stuck" for the full TTL.
+ * No caching — see listProjects() above for why.
  */
 export async function getProjectDetails(id) {
-  const cached = getCachedProjectDetails(id);
-  if (cached) return cached;
-
   try {
     const remote = await fetchDoc(COLLECTION, id);
     if (remote) {
       const { title, description, tags, link, detailsLink, status, duration, stars, ...details } = remote;
-      const result = {
+      return {
         project: { id, title, description, tags, link, detailsLink, status, duration, stars },
         details,
         source: 'firestore',
       };
-      cacheSet(`project:${id}`, result, CACHE_TTL_MS);
-      return result;
     }
   } catch (err) {
     return { ...localProjectDetails(id), source: 'static-fallback', error: err };

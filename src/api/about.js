@@ -3,7 +3,7 @@ import { cacheGet, cacheSet } from './cache';
 import { data as staticData } from '../../data.js';
 
 const CACHE_KEY = 'about:main';
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes, per-tab (sessionStorage — see api/cache.js)
+const CACHE_TTL_MS = 30 * 1000; // 30 seconds (reduced per user requirement)
 
 // Everything in data.js except `projects` (that's its own collection/fetch —
 // see api/projects.js) — the synchronous, always-available fallback.
@@ -21,14 +21,15 @@ export function getCachedAboutMe() {
 
 /**
  * GET about/main — name, role, bio, hero tagline, contact, education,
- * experience, skills, interests, certificates, stats, resume + images.
- * One document, one round-trip: Firestore's client SDK can't project
- * individual fields of a doc, so fetching "one field at a time" would mean
- * one full request per field — strictly slower, not faster. Cached in
- * sessionStorage for 5 minutes; a cache hit short-circuits this entirely
- * (see useAboutMe's lazy init) so most mounts never hit the network at all.
+ * experience, skills, skillCards, interests, certificates, stats, resume + images.
+ * Cached in sessionStorage for 30s. Set force: true to bypass cache.
  */
-export async function getAboutMe() {
+export async function getAboutMe({ force = false } = {}) {
+  if (!force) {
+    const cached = cacheGet(CACHE_KEY);
+    if (cached) return { data: cached, source: 'cache' };
+  }
+
   try {
     const remote = await fetchDoc('about', 'main');
     if (remote) {

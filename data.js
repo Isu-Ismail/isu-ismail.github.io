@@ -58,6 +58,20 @@ export const data = {
   skills: [
     "MQTT", "Docker", "Docker Swarm", "NGINX", "Pocketbase", "Prometheus", "Grafana", "JupyterHub", "Git", "XAMPP", "GlusterFS", "FireBase", "Python", "FastAPI", "React", "Flutter", "Arduino", "SolidWorks", "Creo", "NX CAD", "CATIA", "Abaqus CAE"
   ],
+  skillCards: [
+    {
+      title: "Systems & DevOps",
+      items: ["Docker", "Docker Swarm", "NGINX", "Pocketbase", "Prometheus", "Grafana", "JupyterHub", "GlusterFS", "Git", "XAMPP", "FireBase"]
+    },
+    {
+      title: "Software & Protocols",
+      items: ["Python", "FastAPI", "React", "Flutter", "Arduino", "MQTT"]
+    },
+    {
+      title: "CAD/CAE Engineering",
+      items: ["SolidWorks", "Creo", "NX CAD", "CATIA", "Abaqus CAE"]
+    }
+  ],
   interests: ["3D Printing", "Home Server Administration", "Karting", "Tech Exploration"],
   certificates: [
     {

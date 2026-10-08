@@ -1,16 +1,13 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { getAboutMe, getCachedAboutMe, localAboutMe } from '../api/about';
 
 /**
- * Serves instantly on every render — from a fresh (<5min) sessionStorage
- * cache if one exists, else from the bundled data.js — and never shows a
- * loading state itself. If the cache is cold/expired, a fetch happens in
- * the background and the result swaps in silently once it resolves (no
- * flag ever flips to "loading", so no visual reload). Callers that want a
- * loading/skeleton state for a specific piece (e.g. an image) should gate
- * on that piece's own readiness (onLoad, etc.), not on this hook.
+ * Serves instantly on every render from cache or static data,
+ * and always refetches fresh from Firestore on page navigation.
  */
 export function useAboutMe() {
+  const location = useLocation();
   const [state, setState] = useState(() => {
     const cached = getCachedAboutMe();
     if (cached) return { data: cached, source: 'cache' };
@@ -18,10 +15,9 @@ export function useAboutMe() {
   });
 
   useEffect(() => {
-    if (getCachedAboutMe()) return; // within the 5-minute window — skip the network entirely
-
     let cancelled = false;
-    getAboutMe().then((result) => {
+    // Always refetch fresh on navigation
+    getAboutMe({ force: true }).then((result) => {
       if (!cancelled && result.source === 'firestore') {
         setState({ data: result.data, source: 'firestore' });
       }
@@ -29,7 +25,7 @@ export function useAboutMe() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [location.pathname]);
 
   return state;
 }

@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
-import { listProjects, getCachedProjects } from '../api/projects';
+import { useLocation } from 'react-router-dom';
+import { listProjects } from '../api/projects';
 
 export function useProjects() {
-  // Lazy initializer: a fresh cache hit is checked BEFORE first paint, so a
-  // cached project list renders immediately with no skeleton flash at all.
-  const [state, setState] = useState(() => {
-    const cached = getCachedProjects();
-    if (cached) return { ...cached, loading: false };
-    return { projects: [], loading: true, error: null, source: 'pending' };
-  });
+  const location = useLocation();
+  const [state, setState] = useState({ projects: [], loading: true, error: null, source: 'pending' });
 
   useEffect(() => {
-    if (getCachedProjects()) return; // already satisfied by the lazy initializer above
-
     let cancelled = false;
     listProjects().then((result) => {
       if (!cancelled) setState({ ...result, loading: false });
@@ -20,7 +14,7 @@ export function useProjects() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [location.pathname]);
 
   return state;
 }
