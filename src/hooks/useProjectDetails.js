@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react';
-import { getProjectDetails } from '../api/projects';
+import { subscribeToProjectDetails, getCachedProjectDetails } from '../api/projects';
 
+/**
+ * Subscribes to real-time project details via Firestore onSnapshot.
+ * Synchronously initializes from memory / sessionStorage (no skeleton flash on revisit),
+ * and live-pushes any changes saved in port-admin.
+ */
 export function useProjectDetails(id) {
-  const [state, setState] = useState({ project: null, details: null, loading: true, error: null, source: 'pending' });
+  const [state, setState] = useState(() => getCachedProjectDetails(id));
 
   useEffect(() => {
     if (!id) return;
-    let cancelled = false;
-    getProjectDetails(id).then((result) => {
-      if (!cancelled) setState({ ...result, loading: false });
+    const unsubscribe = subscribeToProjectDetails(id, (nextState) => {
+      setState(nextState);
     });
-    return () => {
-      cancelled = true;
-    };
+    return unsubscribe;
   }, [id]);
 
   return state;

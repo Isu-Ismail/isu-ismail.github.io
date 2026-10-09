@@ -64,3 +64,41 @@ export async function fetchCollection(collectionName) {
     return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   })());
 }
+
+// Subscribes to real-time changes on a single document via onSnapshot.
+// Returns an unsubscribe function.
+export function subscribeDoc(collectionName, docId, onNext, onError) {
+  if (!firebaseEnabled) return () => {};
+  let unsub = null;
+  let cancelled = false;
+
+  getFirestoreModule()
+    .then(({ db, doc, onSnapshot }) => {
+      if (cancelled) return;
+      try {
+        unsub = onSnapshot(
+          doc(db, collectionName, docId),
+          (snap) => {
+            if (!cancelled && onNext) {
+              onNext(snap.exists() ? snap.data() : null);
+            }
+          },
+          (err) => {
+            if (!cancelled && onError) {
+              onError(err);
+            }
+          }
+        );
+      } catch (err) {
+        if (!cancelled && onError) onError(err);
+      }
+    })
+    .catch((err) => {
+      if (!cancelled && onError) onError(err);
+    });
+
+  return () => {
+    cancelled = true;
+    if (unsub) unsub();
+  };
+}

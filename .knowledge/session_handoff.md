@@ -72,11 +72,23 @@ without switching routing to a hash router.
    - Verified: `npx eslint .` clean, `npx vite build` succeeds, `dist/index.html` confirmed
      using absolute asset paths.
 
-## Fallback data & unblocking render
+## Real-time Firestore Listeners & Long-TTL Caching
 
-- Restored `data.js` as the instant-render fallback (`localAboutMe()` and `localProjectsList()`) so first paint is never blank while Firestore initializes.
-- Updated `useAboutMe.js` to serve cached or `localAboutMe()` immediately on mount, updating silently in background when Firestore returns.
-- Fixed `aboutReady` in `App.jsx`: previously, every section was blocked waiting for `useImagePreload(data.images?.profile)`. Now latches to `true` whenever data is present or the profile image finishes loading, ensuring content never stays hidden.
+- **`about/main`**:
+  - `src/hooks/useAboutMe.js` subscribes via `subscribeToAboutMe` (`onSnapshot`).
+  - Zero additional Firestore reads on route navigation.
+  - Live push updates across all fields (bio, resume, skills, stats).
+- **Project Details (`/projects/:id`)**:
+  - Added `subscribeToProjectDetails(id, callback)` and `getCachedProjectDetails(id)` in `src/api/projects.js` with 24-hour TTL caching across memory and `sessionStorage`.
+  - Updated `src/hooks/useProjectDetails.js`: renders instantly from cache when revisiting project pages (no skeleton flash or refetch delays).
+  - Subscribes via Firestore `onSnapshot`: any updates published from `port-admin` (e.g. narratives, images, metrics) push live without requiring a page refresh.
+- **Project List (`/projects`)**:
+  - Added 24-hour caching (`projects:list`) and instant synchronous initialization in `src/hooks/useProjects.js`.
+  - Removed route-change refetch (`[location.pathname]`), cutting down redundant `listProjects()` network requests on navigation.
+- **Cleaned redundant duplicate images**:
+  - Removed duplicate `new Image()` preloading in `App.jsx`, eliminating Firefox's `NS_BINDING_ABORTED` cancelled connection.
+  - In `ProjectDetail.jsx`, replaced the duplicate blurred backdrop `<img>` with a CSS `background-image` container, ensuring each slide only creates a single DOM image request instead of two competing requests.
+  - In development mode (`pnpm run dev`), React StrictMode's dev-only mount-unmount-remount can trigger harmless aborted sockets on in-flight requests during unmount; in production builds, StrictMode is bypassed.
 
 ## How to use this file
 

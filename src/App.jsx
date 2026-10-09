@@ -3,7 +3,6 @@ import { Routes, Route, useNavigate, useLocation, useParams } from 'react-router
 import { useProjects } from './hooks/useProjects';
 import { useAboutMe } from './hooks/useAboutMe';
 import { emptyAboutMe } from './api/about';
-import { useImagePreload } from './hooks/useImagePreload';
 import { useProjectDetails } from './hooks/useProjectDetails';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
@@ -68,12 +67,7 @@ export default function App() {
     projects: projects && projects.length > 0 ? projects : aboutData?.projects || [],
   };
 
-  const aboutImageReady = useImagePreload(data.images?.profile);
-  const [aboutReady, setAboutReady] = useState(false);
-  // React one-way latch: ready if profile image finishes preloading OR if valid data is present
-  if ((aboutImageReady || Boolean(aboutData?.name)) && !aboutReady) {
-    setAboutReady(true);
-  }
+  const aboutReady = Boolean(aboutData?.name || data?.name);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [terminalOpen, setTerminalOpen] = useState(false);
   const [resumeModalOpen, setResumeModalOpen] = useState(false);

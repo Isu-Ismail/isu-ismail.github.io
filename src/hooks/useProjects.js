@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { listProjects } from '../api/projects';
+import { listProjects, getCachedProjectsList } from '../api/projects';
 
 export function useProjects() {
-  const location = useLocation();
-  const [state, setState] = useState({ projects: [], loading: true, error: null, source: 'pending' });
+  const [state, setState] = useState(() => {
+    const cached = getCachedProjectsList();
+    return {
+      projects: cached || [],
+      loading: !cached || cached.length === 0,
+      error: null,
+      source: cached && cached.length > 0 ? 'cache' : 'pending',
+    };
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -14,7 +20,7 @@ export function useProjects() {
     return () => {
       cancelled = true;
     };
-  }, [location.pathname]);
+  }, []);
 
   return state;
 }

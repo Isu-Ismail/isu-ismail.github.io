@@ -183,10 +183,13 @@ export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
             >
               {details.images.map((imgUrl, idx) => (
                 <div key={idx} className="min-w-full h-full relative cursor-pointer overflow-hidden flex items-center justify-center" onClick={() => openLightbox(idx)}>
-                  {/* Blurred backdrop costs a dedicated GPU layer per image — only
-                      mount it for the active slide instead of all N slides at once. */}
+                  {/* Blurred backdrop uses background-image so only one <img> element is requested */}
                   {idx === carouselIndex && (
-                    <img src={resolveAssetPath(imgUrl)} className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-45 scale-11 transform-gpu will-change-transform" alt="" />
+                    <div
+                      className="absolute inset-0 w-full h-full bg-cover bg-center blur-2xl opacity-45 scale-11 transform-gpu will-change-transform pointer-events-none"
+                      style={{ backgroundImage: `url("${resolveAssetPath(imgUrl)}")` }}
+                      aria-hidden="true"
+                    />
                   )}
                   <img src={resolveAssetPath(imgUrl)} className="relative max-h-full max-w-full object-contain z-10 transition-transform duration-500 hover:scale-[1.01]" alt={`Slide ${idx + 1}`} loading={idx === 0 ? 'eager' : 'lazy'} />
                 </div>
