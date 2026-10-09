@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Calendar, X, Award, ExternalLink } from 'lucide-react';
 import { resolveAssetPath } from '../utils';
 
@@ -67,10 +68,10 @@ export const Timeline = ({ title, subtitle, items }) => {
         ))}
       </div>
 
-      {/* Certificate Modal Popup */}
-      {activeCert && (
+      {/* Certificate Modal Popup — portaled to document.body without blur */}
+      {activeCert && createPortal(
         <div 
-          className="fixed inset-0 bg-black/80 backdrop-blur-md z-[300] flex items-center justify-center p-4 sm:p-6 md:p-8 animate-fade-in"
+          className="fixed inset-0 bg-black/80 z-[500] flex items-center justify-center p-4 sm:p-6 md:p-8 animate-fade-in"
           onClick={() => setActiveCert(null)}
         >
           <div 
@@ -118,7 +119,8 @@ export const Timeline = ({ title, subtitle, items }) => {
               />
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

@@ -89,6 +89,16 @@ without switching routing to a hash router.
   - Removed duplicate `new Image()` preloading in `App.jsx`, eliminating Firefox's `NS_BINDING_ABORTED` cancelled connection.
   - In `ProjectDetail.jsx`, replaced the duplicate blurred backdrop `<img>` with a CSS `background-image` container, ensuring each slide only creates a single DOM image request instead of two competing requests.
   - In development mode (`pnpm run dev`), React StrictMode's dev-only mount-unmount-remount can trigger harmless aborted sockets on in-flight requests during unmount; in production builds, StrictMode is bypassed.
+- **Portaled Modals to `document.body` (No Blur, Dim Only, Scroll Locked)**:
+  - Previously, modals inside `Timeline.jsx` and `Certificates.jsx` were nested within `<Reveal as="section">`. Because `<Reveal>` uses CSS `transform: translateY(0)`, CSS specification rules trapped `position: fixed` modals inside that section's coordinates instead of the viewport, hindering scrolling and clipping overlays.
+  - Portaled all modals directly into `document.body` via React's `createPortal(..., document.body)`:
+    - `Timeline.jsx`: Experience and Education certificate modals.
+    - `Certificates.jsx`: Certificate lightbox preview modal.
+    - `ResumeModal.jsx`: Resume preview modal.
+    - `ProjectDetail.jsx`: Gallery and certificate lightbox modal.
+    - `Terminal.jsx`: Interactive terminal popup modal.
+  - Removed all `backdrop-blur-*` filters across all modals, replacing them with a crisp, performant dimmed backdrop (`bg-black/80` / `bg-black/85`).
+  - Enforced body scroll locking (`document.body.style.overflow = 'hidden'`) whenever any modal or mobile drawer is open.
 
 ## How to use this file
 

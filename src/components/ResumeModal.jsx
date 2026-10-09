@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Download, FileText, Loader } from 'lucide-react';
 
 // Plain <img src> — no fetch()-and-cache-as-base64. That approach broke once
@@ -51,7 +52,7 @@ export const ResumeModal = ({ isOpen, onClose, resumeUrl, resumeImage }) => {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[500] flex items-center justify-center p-4 sm:p-8"
       role="dialog"
@@ -131,6 +132,7 @@ export const ResumeModal = ({ isOpen, onClose, resumeUrl, resumeImage }) => {
         </div>
       </div>
 
-    </div>
+    </div>,
+    document.body
   );
 };

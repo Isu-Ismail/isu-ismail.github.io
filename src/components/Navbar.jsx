@@ -33,6 +33,13 @@ export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, github
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   const handleNavClick = (e, sectionId) => {
     e.preventDefault();
     setMobileMenuOpen(false);
@@ -107,7 +114,7 @@ export const Navbar = ({ theme, toggleTheme, toggleTerminal, currentView, github
 
       {/* Drawer Overlay */}
       <div 
-        className={`fixed inset-0 z-[109] bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-[109] bg-black/60 transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setMobileMenuOpen(false)}
       />
 

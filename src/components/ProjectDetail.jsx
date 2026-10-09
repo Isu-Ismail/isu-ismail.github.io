@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import DOMPurify from 'dompurify';
 import { resolveAssetPath } from '../utils';
 import {
@@ -303,19 +304,19 @@ export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
         </div>
       </div>
 
-      {/* Lightbox Modal overlay */}
-      {lightboxOpen && (
-        <div className="fixed inset-0 bg-slate-950/95 z-[300] flex items-center justify-center p-8" onClick={(e) => e.target.classList.contains('fixed') && setLightboxOpen(false)}>
-          <button className="absolute top-6 right-6 bg-white/8 border-none text-white w-11 h-11 rounded-full flex items-center justify-center cursor-pointer transition-colors duration-200 hover:bg-red-500" onClick={() => setLightboxOpen(false)}>
+      {/* Lightbox Modal overlay — portaled to document.body without blur */}
+      {lightboxOpen && createPortal(
+        <div className="fixed inset-0 bg-black/85 z-[500] flex items-center justify-center p-4 sm:p-8 animate-fade-in" onClick={(e) => e.target.classList.contains('fixed') && setLightboxOpen(false)}>
+          <button className="absolute top-6 right-6 bg-white/10 hover:bg-white/20 border-none text-white w-11 h-11 rounded-full flex items-center justify-center cursor-pointer transition-colors duration-200" onClick={() => setLightboxOpen(false)} aria-label="Close lightbox">
             <X size={24} />
           </button>
 
           {allMedia.length > 1 && (
             <>
-              <button className="absolute top-1/2 -translate-y-1/2 left-8 bg-white/8 border-none text-white w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-primary" onClick={handleLightboxPrev}>
+              <button className="absolute top-1/2 -translate-y-1/2 left-4 sm:left-8 bg-white/10 hover:bg-primary border-none text-white w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200" onClick={handleLightboxPrev} aria-label="Previous media">
                 <ChevronLeft size={24} />
               </button>
-              <button className="absolute top-1/2 -translate-y-1/2 right-8 bg-white/8 border-none text-white w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 hover:bg-primary" onClick={handleLightboxNext}>
+              <button className="absolute top-1/2 -translate-y-1/2 right-4 sm:right-8 bg-white/10 hover:bg-primary border-none text-white w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-200" onClick={handleLightboxNext} aria-label="Next media">
                 <ChevronRight size={24} />
               </button>
             </>
@@ -328,7 +329,8 @@ export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
               alt="Enlarged Project Media" 
             />
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

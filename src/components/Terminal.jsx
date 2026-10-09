@@ -1,6 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 export const Terminal = ({ isOpen, onClose, data }) => {
+  // Lock body scroll while terminal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
   // Hooks must run unconditionally on every render (Rules of Hooks) — the
   // `isOpen` guard lives below, after all hooks.
   const [inputVal, setInputVal] = useState('');
@@ -95,15 +104,17 @@ export const Terminal = ({ isOpen, onClose, data }) => {
     }
   };
 
-  const handleOverlayClick = (e) => {
-    if (e.target.classList.contains('terminal-overlay')) {
-      onClose();
-    }
-  };
 
-  return (
-    <div className="fixed inset-0 bg-black/65 backdrop-blur-sm z-[200] flex items-center justify-center p-6" onClick={handleOverlayClick}>
-      <div className="w-full max-w-2xl h-[480px] bg-[#0d1117] border border-[#30363d] rounded-2xl flex flex-col shadow-2xl overflow-hidden font-mono text-left animate-fade-in">
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 bg-black/80 z-[500] flex items-center justify-center p-4 sm:p-6 animate-fade-in"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="w-full max-w-2xl h-[480px] bg-[#0d1117] border border-[#30363d] rounded-2xl flex flex-col shadow-2xl overflow-hidden font-mono text-left">
         <div className="bg-[#161b22] px-5 py-3 flex items-center justify-between border-b border-[#30363d] select-none">
           <div className="flex gap-1.5">
             <span className="w-3 h-3 rounded-full bg-red-500 cursor-pointer" onClick={onClose} />
@@ -148,6 +159,7 @@ export const Terminal = ({ isOpen, onClose, data }) => {
           />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

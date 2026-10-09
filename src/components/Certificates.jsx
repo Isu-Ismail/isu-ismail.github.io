@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Award, X, ZoomIn } from 'lucide-react';
 
 export const Certificates = ({ certificates }) => {
@@ -65,10 +66,10 @@ export const Certificates = ({ certificates }) => {
         ))}
       </div>
 
-      {/* Lightbox modal */}
-      {lightbox && (
+      {/* Lightbox modal — portaled to document.body without blur */}
+      {lightbox && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-black/80 animate-fade-in"
           onClick={() => setLightbox(null)}
         >
           <div
@@ -77,8 +78,9 @@ export const Certificates = ({ certificates }) => {
           >
             {/* Close button */}
             <button
-              className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-bg-tertiary border border-border-color flex items-center justify-center text-text-secondary hover:text-primary hover:border-primary transition-all duration-200"
+              className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-bg-tertiary border border-border-color flex items-center justify-center text-text-secondary hover:text-primary hover:border-primary transition-all duration-200 cursor-pointer"
               onClick={() => setLightbox(null)}
+              aria-label="Close certificate preview"
             >
               <X size={18} />
             </button>
@@ -96,7 +98,8 @@ export const Certificates = ({ certificates }) => {
               <span className="text-text-secondary text-sm font-semibold">{lightbox.title}</span>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
