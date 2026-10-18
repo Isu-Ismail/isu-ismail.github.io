@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Download, FileText, Loader } from 'lucide-react';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 // Plain <img src> — no fetch()-and-cache-as-base64. That approach broke once
 // resumeImage became a Firebase Storage URL: fetch() needs CORS headers on
@@ -35,10 +36,7 @@ export const ResumeModal = ({ isOpen, onClose, resumeUrl, resumeImage }) => {
   }, [isOpen, onClose]);
 
   // Prevent body scroll while open
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   // Programmatic download — no page navigation, no color-invert flash
   const handleDownload = () => {
@@ -102,7 +100,7 @@ export const ResumeModal = ({ isOpen, onClose, resumeUrl, resumeImage }) => {
         </div>
 
         {/* Preview body */}
-        <div className="flex-1 overflow-auto bg-bg-primary/60 p-4 sm:p-6 flex items-start justify-center min-h-0">
+        <div className="flex-1 overflow-auto bg-bg-primary/60 p-4 sm:p-6 flex items-start justify-center min-h-0" data-lenis-prevent>
           <div className="w-full rounded-xl overflow-hidden border border-border-color shadow-xl">
             {status === 'empty' || status === 'error' ? (
               <div className="flex flex-col items-center justify-center py-24 text-text-muted gap-4">

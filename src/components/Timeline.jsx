@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Calendar, X, Award, ExternalLink } from 'lucide-react';
 import { resolveAssetPath } from '../utils';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 export const Timeline = ({ title, subtitle, items }) => {
   const [activeCert, setActiveCert] = useState(null);
@@ -16,15 +17,8 @@ export const Timeline = ({ title, subtitle, items }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeCert]);
 
-  // Without this, the page behind the fixed/backdrop-blur-md modal stays
-  // scrollable — scrolling a full-screen blur filter on every frame is the
-  // same class of jank already fixed elsewhere (Navbar, carousel backdrop).
-  useEffect(() => {
-    document.body.style.overflow = activeCert ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [activeCert]);
+  // Without this, the page behind the modal stays scrollable.
+  useScrollLock(Boolean(activeCert));
 
   if (!items || items.length === 0) return null;
 
@@ -111,7 +105,7 @@ export const Timeline = ({ title, subtitle, items }) => {
             </div>
 
             {/* Modal Body with Certificate Image */}
-            <div className="p-4 sm:p-6 flex items-center justify-center overflow-auto bg-black/20">
+            <div className="p-4 sm:p-6 flex items-center justify-center overflow-auto bg-black/20" data-lenis-prevent>
               <img 
                 src={activeCert.image} 
                 alt={activeCert.title} 

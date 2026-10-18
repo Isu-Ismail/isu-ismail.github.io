@@ -174,7 +174,7 @@ export const Hero = ({ role, name, githubUrl, linkedinUrl, instagramUrl, data, o
             <div className="flex-1 text-center text-xs text-text-muted mr-9">ismail@portfolio-server:~</div>
           </div>
 
-          <div className="flex-1 p-5 overflow-y-auto text-xs text-text-primary flex flex-col gap-2 text-left" ref={terminalBodyRef}>
+          <div className="flex-1 p-5 overflow-y-auto text-xs text-text-primary flex flex-col gap-2 text-left" ref={terminalBodyRef} data-lenis-prevent>
             {terminalHistory.map((item, idx) => (
               <div key={idx} className={`whitespace-pre-wrap leading-relaxed ${item.type === 'input' ? 'font-semibold text-primary' : item.type === 'response' ? 'text-text-secondary' : 'text-text-muted'}`}>
                 {item.type === 'input' && <span className="text-primary font-bold">➜ </span>}

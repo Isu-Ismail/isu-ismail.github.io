@@ -1,15 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 export const Terminal = ({ isOpen, onClose, data }) => {
   // Lock body scroll while terminal is open
-  useEffect(() => {
-    if (!isOpen) return;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
   // Hooks must run unconditionally on every render (Rules of Hooks) — the
   // `isOpen` guard lives below, after all hooks.
   const [inputVal, setInputVal] = useState('');
@@ -32,14 +27,6 @@ export const Terminal = ({ isOpen, onClose, data }) => {
       outputRef.current.scrollTop = outputRef.current.scrollHeight;
     }
   }, [history]);
-
-  // Keep the page from scrolling behind the full-screen backdrop-blur overlay.
-  useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -125,7 +112,7 @@ export const Terminal = ({ isOpen, onClose, data }) => {
           <div style={{ width: '40px' }} />
         </div>
 
-        <div className="flex-1 p-5 overflow-y-auto text-sm text-[#c9d1d9] flex flex-col gap-3" ref={outputRef}>
+        <div className="flex-1 p-5 overflow-y-auto text-sm text-[#c9d1d9] flex flex-col gap-3" ref={outputRef} data-lenis-prevent>
           {history.map((line, idx) => (
             <div key={idx}>
               {line.type === 'input' && (

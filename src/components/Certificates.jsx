@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Award, X, ZoomIn } from 'lucide-react';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 export const Certificates = ({ certificates }) => {
   // Hooks must run unconditionally on every render (Rules of Hooks) — the
@@ -14,15 +15,8 @@ export const Certificates = ({ certificates }) => {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  // Without this, the page behind the fixed/backdrop-blur-sm lightbox stays
-  // scrollable — scrolling a full-screen blur filter on every frame is the
-  // same class of jank already fixed elsewhere (Navbar, carousel backdrop).
-  useEffect(() => {
-    document.body.style.overflow = lightbox ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [lightbox]);
+  // Without this, the page behind the lightbox stays scrollable.
+  useScrollLock(Boolean(lightbox));
 
   if (!certificates || certificates.length === 0) return null;
 

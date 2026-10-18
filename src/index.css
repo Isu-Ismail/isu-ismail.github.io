@@ -92,13 +92,13 @@
   --text-secondary: #475569;
   --text-muted: #64748b;
 
-  --primary: #e8690f;
-  /* Tech Amber/Orange */
-  --primary-hover: #c2560c;
-  --primary-rgb: 232, 105, 15;
+  --primary: #0d9488;
+  /* Muted teal — calmer than the prior amber */
+  --primary-hover: #0f766e;
+  --primary-rgb: 13, 148, 136;
 
   --border-color: #cbd5e1;
-  --border-focus: #e8690f;
+  --border-focus: #0d9488;
 
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
@@ -122,14 +122,14 @@
   --text-secondary: #a8b3c4;
   --text-muted: #6b7585;
 
-  --primary: #ff8a3d;
-  /* Vivid tech amber */
-  --primary-hover: #ffab6b;
-  --primary-rgb: 255, 138, 61;
+  --primary: #2dd4bf;
+  /* Muted teal — calmer than the prior amber */
+  --primary-hover: #5eead4;
+  --primary-rgb: 45, 212, 191;
 
   --border-color: #22252d;
   /* Obsidian border */
-  --border-focus: #ff8a3d;
+  --border-focus: #2dd4bf;
 
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.45), 0 10px 10px -5px rgba(0, 0, 0, 0.25);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
@@ -225,31 +225,31 @@ body {
 
 .bg-grid-subtle {
   background-size: 36px 36px;
-  background-image: 
-    linear-gradient(to right, rgba(var(--primary-rgb), 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(var(--primary-rgb), 0.08) 1px, transparent 1px);
+  background-image:
+    linear-gradient(to right, rgba(var(--primary-rgb), 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(var(--primary-rgb), 0.05) 1px, transparent 1px);
 }
 
 .bg-dots-subtle {
   background-size: 24px 24px;
-  background-image: radial-gradient(rgba(var(--primary-rgb), 0.14) 1.3px, transparent 1.3px);
+  background-image: radial-gradient(rgba(var(--primary-rgb), 0.09) 1.3px, transparent 1.3px);
 }
 
 /* Zero-blur, Zero-lag Radial Glow Orbs (Pure Hardware-Composited Gradients) */
 .glow-orb-primary {
-  background: radial-gradient(circle at center, rgba(var(--primary-rgb), 0.22) 0%, rgba(var(--primary-rgb), 0.07) 45%, transparent 72%);
+  background: radial-gradient(circle at center, rgba(var(--primary-rgb), 0.14) 0%, rgba(var(--primary-rgb), 0.045) 45%, transparent 72%);
   transform: translate3d(0, 0, 0);
   will-change: transform;
 }
 
 .glow-orb-soft {
-  background: radial-gradient(circle at center, rgba(var(--primary-rgb), 0.14) 0%, rgba(var(--primary-rgb), 0.04) 50%, transparent 75%);
+  background: radial-gradient(circle at center, rgba(var(--primary-rgb), 0.09) 0%, transparent 50%, transparent 75%);
   transform: translate3d(0, 0, 0);
   will-change: transform;
 }
 
 .glow-orb-accent {
-  background: radial-gradient(circle at center, rgba(var(--primary-rgb), 0.25) 0%, rgba(var(--primary-rgb), 0.08) 40%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(var(--primary-rgb), 0.16) 0%, rgba(var(--primary-rgb), 0.05) 40%, transparent 70%);
   transform: translate3d(0, 0, 0);
   will-change: transform;
 }

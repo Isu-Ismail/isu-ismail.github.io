@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import DOMPurify from 'dompurify';
 import { resolveAssetPath } from '../utils';
+import { useScrollLock } from '../hooks/useScrollLock';
 import {
   ArrowLeft, ExternalLink, Calendar, GitBranch, Layers, Award,
   ChevronLeft, ChevronRight, X, Terminal, MessageSquare, Cpu, Shuffle, 
@@ -84,12 +85,7 @@ export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
   }, [lightboxOpen, allMedia.length]);
 
   // Keep the page from scrolling behind the full-screen lightbox overlay.
-  useEffect(() => {
-    document.body.style.overflow = lightboxOpen ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [lightboxOpen]);
+  useScrollLock(lightboxOpen);
 
   if (!project || !details) return null;
 
@@ -184,14 +180,6 @@ export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
             >
               {details.images.map((imgUrl, idx) => (
                 <div key={idx} className="min-w-full h-full relative cursor-pointer overflow-hidden flex items-center justify-center" onClick={() => openLightbox(idx)}>
-                  {/* Blurred backdrop uses background-image so only one <img> element is requested */}
-                  {idx === carouselIndex && (
-                    <div
-                      className="absolute inset-0 w-full h-full bg-cover bg-center blur-2xl opacity-45 scale-11 transform-gpu will-change-transform pointer-events-none"
-                      style={{ backgroundImage: `url("${resolveAssetPath(imgUrl)}")` }}
-                      aria-hidden="true"
-                    />
-                  )}
                   <img src={resolveAssetPath(imgUrl)} className="relative max-h-full max-w-full object-contain z-10 transition-transform duration-500 hover:scale-[1.01]" alt={`Slide ${idx + 1}`} loading={idx === 0 ? 'eager' : 'lazy'} />
                 </div>
               ))}
@@ -199,10 +187,10 @@ export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
 
             {details.images.length > 1 && (
               <>
-                <button className="absolute top-1/2 -translate-y-1/2 left-4 bg-black/60 border border-white/15 text-white w-11 h-11 rounded-full flex items-center justify-center cursor-pointer z-10 transition-all duration-200 backdrop-blur-xs hover:bg-primary hover:border-primary" onClick={handleCarouselPrev}>
+                <button className="absolute top-1/2 -translate-y-1/2 left-4 bg-black/60 border border-white/15 text-white w-11 h-11 rounded-full flex items-center justify-center cursor-pointer z-10 transition-all duration-200 hover:bg-primary hover:border-primary" onClick={handleCarouselPrev}>
                   <ChevronLeft size={20} />
                 </button>
-                <button className="absolute top-1/2 -translate-y-1/2 right-4 bg-black/60 border border-white/15 text-white w-11 h-11 rounded-full flex items-center justify-center cursor-pointer z-10 transition-all duration-200 backdrop-blur-xs hover:bg-primary hover:border-primary" onClick={handleCarouselNext}>
+                <button className="absolute top-1/2 -translate-y-1/2 right-4 bg-black/60 border border-white/15 text-white w-11 h-11 rounded-full flex items-center justify-center cursor-pointer z-10 transition-all duration-200 hover:bg-primary hover:border-primary" onClick={handleCarouselNext}>
                   <ChevronRight size={20} />
                 </button>
               </>
@@ -236,7 +224,7 @@ export const ProjectDetail = ({ project, details, onBack, animate = true }) => {
         </div>
 
         {/* Sidebar */}
-        <div className="lg:sticky lg:top-24 space-y-8 w-full transform-gpu">
+        <div className="space-y-8 w-full transform-gpu">
           {/* Deployment Architecture visual card */}
           {details.architectureNodes && (
             <div className="bg-bg-secondary border border-border-color rounded-lg overflow-hidden shadow-md text-left">
