@@ -1,104 +1,69 @@
 # Session Handoff
 
-_Last updated: 2026-10-09_
+_Last updated: 2026-10-18_
 
 ## Current state
 
-Fully Firestore-backed SPA with local fallbacks (`data.js` and `datas/projectDetailsData.js`) for instant frame-0 renders and resilient offline/unreachable network handling. Firebase client config in `src/firebase.js` carries default public web credentials so GitHub Actions builds without `.env` connect to Firestore seamlessly. Profile image prioritizes loading via `fetchPriority="high"` and storage preconnect.
+Firestore-backed SPA with local fallbacks (`datas/data.js`, `datas/projectDetailsData.js`) for
+instant frame-0 renders and resilient offline/unreachable handling (added in a session between
+the previous handoff and this one — not something this turn touched). Real-time Firestore
+listeners (`onSnapshot`) for `about/main` and project details, long-TTL (24h) memory +
+sessionStorage caching. Modals are portaled to `document.body`, dimmed (no blur), scroll-locked.
+Page-wide smooth scroll via Lenis (new this turn). `eslint .` and `vite build` both clean.
 
-## What just happened (this session)
+## What just happened (this turn)
 
-1. **"Project not found" / "Page not found" on `/projects/ctskii`**:
-   - Fixed `src/firebase.js`: added fallback public client credentials so production builds on GitHub Actions (where `.env` is absent) can connect to Firestore.
-   - Fixed `src/api/projects.js`: added `localProjectDetails(id)` fallback using `datas/projectDetailsData.js` and `localProjectsList()`, preventing "Project not found" if network is slow or Firestore is temporarily disconnected.
-   - Clarified `detailsLink`: explained that `detailsLink` was the legacy static HTML link (`./project_details/ctskii.html`), whereas the modern app uses clean dynamic routing `/projects/:id` (`id: 'ctskii'`).
-   - Expanded `hasDetailPage` in `Projects.jsx` to recognize projects with `subtitle` or `images`.
-2. **Profile image loading slow**:
-   - Removed `loading="lazy"` on the main profile picture in `About.jsx` and added `fetchPriority="high"`.
-   - Added `<link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>` to `index.html` so network handshakes complete before the image request.
+Three asks: (1) on mobile, Projects section cards were invisible (but clicking where a card
+should be still navigated into its detail page), (2) reduce font sizes dynamically on mobile,
+(3) add Lenis smooth-scroll.
 
-User reported three problems in one request: (1) reloading on a project detail page
-(`/projects/:id`) showed a blank page, (2) the "View Live" project link didn't seem to reflect
-updates, (3) wanted all hardcoded content values archived (not deleted) into a `datas/` folder,
-without switching routing to a hash router.
+1. **Mobile invisible-but-clickable cards — FIXED.** Root cause: `src/hooks/useInView.js`
+   (used by `Reveal`, which wraps the whole Projects/Skills/etc. sections) used
+   `threshold: 0.15` — a ratio of the *target's own area*, not the viewport. On a narrow phone
+   screen the Projects section (single-column card stack) is much taller than the viewport, so
+   15% of its own height needs to be on-screen simultaneously before `isVisible` ever flips —
+   requiring scrolling most of the way through the section first. Until then the section sat
+   at `.reveal`'s `opacity: 0` (CSS opacity doesn't block clicks, which is why the cards still
+   "worked" invisibly). Fixed by dropping the threshold to `0.01` so it fires as soon as the
+   section's top edge is on screen, independent of the section's own height. Applies to every
+   `<Reveal>`-wrapped section, not just Projects.
+2. **Mobile font sizes — fluid, not per-component.** All Tailwind `text-*` sizes are rem-based,
+   so added one fluid rule instead of editing every component:
+   ```css
+   @media (max-width: 640px) {
+     html { font-size: clamp(14px, 4vw, 16.5px); }
+   }
+   ```
+   in `src/index.css` (base `html` rule was a fixed `17.6px`). Scales every heading/body/badge
+   proportionally and keeps adjusting smoothly across phone widths, not just at one breakpoint.
+3. **Lenis smooth scroll — added.** `pnpm add lenis` (v1.3.27).
+   - `src/hooks/useLenis.js` — creates one `Lenis` instance + its own `requestAnimationFrame`
+     loop, destroyed on unmount. Skipped entirely under `prefers-reduced-motion`. Called once
+     at the top of `App.jsx` (`useLenis();`).
+   - `src/lib/lenis.js` — module-level singleton holding the live instance, exposing
+     `smoothScrollTo(target)` so other code can scroll through the SAME engine instead of
+     fighting it with a separate native animation.
+   - `Navbar.jsx`'s nav-link clicks (`handleNavClick`) now call `smoothScrollTo(element)`
+     instead of `element.scrollIntoView({ behavior: 'smooth' })` — avoids two competing scroll
+     animations (native smooth-scroll vs. Lenis's rAF-driven one) fighting each other.
+   - Lenis drives the REAL document scroll position each frame (not a virtual/transform
+     scroll), so every existing scroll listener (`Navbar`'s scrolled-state,
+     `UnifiedBackground`'s `is-scrolling` toggle, `history.scrollRestoration = 'manual'` in
+     `main.jsx`) needed no changes — confirmed by reading each one, not by assumption.
+   - Modals' `document.body.style.overflow = 'hidden'` still blocks scrolling correctly with
+     Lenis active — overflow:hidden on body means there's nothing for Lenis to scroll either,
+     no extra wiring needed.
 
-1. **Reload-blank-page — FIXED.** Root cause: `vite.config.js` had `base: './'` (relative).
-   The built `index.html` then emitted `<script src="./assets/...">`, which resolves relative
-   to the current URL path — breaks the moment the browser loads a nested route directly (e.g.
-   `/projects/certflow`), since `./assets/` then resolves under `/projects/`, not site root.
-   Fixed to `base: '/'`. Confirmed via `vite build` + reading `dist/index.html`: script/css
-   `src`/`href` are now `/assets/...` (absolute). GitHub Pages' `public/404.html` +
-   `index.html`'s inline redirect script (the actual SPA-routing workaround, NOT a hash
-   router) were confirmed intact and untouched — satisfies the user's explicit constraint.
-2. **"View Live" link — likely same root cause, not hardcoded values.** Grepped
-   `Projects.jsx`/`ProjectDetail.jsx`: both read `project.link` straight from the fetched
-   Firestore doc, zero hardcoded URLs anywhere. Working theory: the same base-path bug meant
-   reload never actually re-fetched, so "the link doesn't update" was really "you're looking
-   at a stale render that can't refresh." Not yet confirmed with the user after the fix —
-   worth asking them to verify now that reload works.
-3. **Archived to `datas/`** (git-detected renames, confirmed via `git status`): `assets/` →
-   `datas/assets/`, `project_pictures/` → `datas/project_pictures/`, `data.js` →
-   `datas/data.js`, `src/projectDetailsData.js` → `datas/projectDetailsData.js`. Scope decided
-   by grep: these were the only files holding hardcoded personal/project content; `games/` was
-   deliberately left alone (real interactive game files, referenced via Firestore's `gamePath`
-   field, not "data" in the sense the user meant).
-   - `index.html`'s favicon now points to `/logo.svg` (an identical copy already existed in
-     `public/`) instead of `./assets/logo.svg`.
-   - `src/api/about.js` rewritten: no more `data.js` import/fallback. Exports `emptyAboutMe()`
-     — a fully-shaped-but-blank object — used whenever Firestore is unreachable/empty.
-   - `src/hooks/useAboutMe.js` rewritten to match (no `localAboutMe()`; returns
-     `{ data: null, loading: true }` on a cold cache instead of instant static data).
-   - `src/App.jsx`: dropped the `data.js` import; `data = { ...emptyAboutMe(), ...aboutData,
-     projects }` — this merge matters because `Hero.jsx` does unconditional `name.split(" ")`
-     at render time, which would throw on `undefined` without it. `projectsCount` now reads
-     `data.projects.length` directly (no more static-count-while-loading fallback).
-   - `src/api/projects.js` rewritten: no more `data.js`/`projectDetailsData.js` import,
-     `localProjectsList()`/`localProjectDetails()` deleted. `listProjects()` returns
-     `{ projects: [] }` on error; `getProjectDetails()` returns `{ project: null, details:
-     null }` on error/empty. No caching (already was the case before this session).
-   - `scripts/seed-firestore.mjs`, `scripts/upload-project-pictures.mjs`: import paths updated
-     to `../datas/data.js` / `../datas/projectDetailsData.js`; the latter's `toDiskPath()`
-     helper now resolves through `../datas/` so it can still find images on disk if re-run.
-   - `.github/workflows/deploy.yml`: removed the now-dead `cp -r assets` / `cp -r
-     project_pictures` steps (nothing at those paths anymore); kept `cp -r games`.
-   - Audited every other component (`About.jsx`, `Navbar.jsx`, `Timeline.jsx`, `Skills.jsx`,
-     `Certificates.jsx`, the Contact section in `App.jsx`, `Terminal.jsx`, `ProjectDetail.jsx`)
-     for unconditional access to fields `emptyAboutMe()` doesn't cover — `Skills.jsx`'s
-     `skillCards` has its own `= []` default param, everything else only touches fields
-     `emptyAboutMe()` already guarantees. No other crash risks found.
-   - `README.md`, `CLAUDE.md`, `.knowledge/architecture.md` updated to drop references to
-     root-level `assets/`/`project_pictures/`/`data.js` and document `datas/` as an archive
-     folder only `scripts/` still reads from.
-   - Verified: `npx eslint .` clean, `npx vite build` succeeds, `dist/index.html` confirmed
-     using absolute asset paths.
+Verified: `npx eslint .` clean, `npx vite build` succeeds (main chunk ~331KB/100KB gzip, Lenis
+added ~3KB to that; no new chunk warnings beyond the pre-existing firebase SDK one).
 
-## Real-time Firestore Listeners & Long-TTL Caching
+## Next agent: what to check
 
-- **`about/main`**:
-  - `src/hooks/useAboutMe.js` subscribes via `subscribeToAboutMe` (`onSnapshot`).
-  - Zero additional Firestore reads on route navigation.
-  - Live push updates across all fields (bio, resume, skills, stats).
-- **Project Details (`/projects/:id`)**:
-  - Added `subscribeToProjectDetails(id, callback)` and `getCachedProjectDetails(id)` in `src/api/projects.js` with 24-hour TTL caching across memory and `sessionStorage`.
-  - Updated `src/hooks/useProjectDetails.js`: renders instantly from cache when revisiting project pages (no skeleton flash or refetch delays).
-  - Subscribes via Firestore `onSnapshot`: any updates published from `port-admin` (e.g. narratives, images, metrics) push live without requiring a page refresh.
-- **Project List (`/projects`)**:
-  - Added 24-hour caching (`projects:list`) and instant synchronous initialization in `src/hooks/useProjects.js`.
-  - Removed route-change refetch (`[location.pathname]`), cutting down redundant `listProjects()` network requests on navigation.
-- **Cleaned redundant duplicate images**:
-  - Removed duplicate `new Image()` preloading in `App.jsx`, eliminating Firefox's `NS_BINDING_ABORTED` cancelled connection.
-  - In `ProjectDetail.jsx`, replaced the duplicate blurred backdrop `<img>` with a CSS `background-image` container, ensuring each slide only creates a single DOM image request instead of two competing requests.
-  - In development mode (`pnpm run dev`), React StrictMode's dev-only mount-unmount-remount can trigger harmless aborted sockets on in-flight requests during unmount; in production builds, StrictMode is bypassed.
-- **Portaled Modals to `document.body` (No Blur, Dim Only, Scroll Locked)**:
-  - Previously, modals inside `Timeline.jsx` and `Certificates.jsx` were nested within `<Reveal as="section">`. Because `<Reveal>` uses CSS `transform: translateY(0)`, CSS specification rules trapped `position: fixed` modals inside that section's coordinates instead of the viewport, hindering scrolling and clipping overlays.
-  - Portaled all modals directly into `document.body` via React's `createPortal(..., document.body)`:
-    - `Timeline.jsx`: Experience and Education certificate modals.
-    - `Certificates.jsx`: Certificate lightbox preview modal.
-    - `ResumeModal.jsx`: Resume preview modal.
-    - `ProjectDetail.jsx`: Gallery and certificate lightbox modal.
-    - `Terminal.jsx`: Interactive terminal popup modal.
-  - Removed all `backdrop-blur-*` filters across all modals, replacing them with a crisp, performant dimmed backdrop (`bg-black/80` / `bg-black/85`).
-  - Enforced body scroll locking (`document.body.style.overflow = 'hidden'`) whenever any modal or mobile drawer is open.
+- Not browser-verified this turn (no browser tool used) — worth a real mobile-width check that
+  Projects cards now fade in promptly and that Lenis's wheel/touch feel is good, not too heavy
+  (`duration: 1.1` is a starting guess, not tuned against real feedback).
+- Nothing from this turn is committed. Follow `CLAUDE.md`'s git rules exactly when asked to
+  commit/push (no AI attribution trailer; a bare "push" means just `git push`).
 
 ## How to use this file
 

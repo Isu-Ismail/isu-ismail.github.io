@@ -144,6 +144,18 @@ html {
   overflow-x: clip;
 }
 
+/* Fluid mobile typography: every Tailwind text-* size is rem-based, so
+   scaling the root font-size scales all of them together (headings, body,
+   badges) proportionally — "shrink everything a bit, keep it neat" without
+   hand-editing every component's text classes. clamp() ties it to viewport
+   width so it keeps adjusting smoothly across phone sizes instead of
+   snapping once at a single breakpoint. */
+@media (max-width: 640px) {
+  html {
+    font-size: clamp(14px, 4vw, 16.5px);
+  }
+}
+
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-primary);

@@ -24,6 +24,7 @@ import { Terminal } from './components/Terminal';
 import { UnifiedBackground } from './components/UnifiedBackground';
 import { Reveal } from './components/Reveal';
 import { ResumeModal } from './components/ResumeModal';
+import { useLenis } from './hooks/useLenis';
 import { Mail, MapPin, Phone } from 'lucide-react';
 
 const GithubIcon = ({ size = 20 }) => (
@@ -52,6 +53,10 @@ let savedHomeScrollY = 0;
 let restoreHomeScrollOnMount = false;
 
 export default function App() {
+  // Smooth-scroll for the whole page (Lenis) — still drives the real
+  // document scroll position, so existing scroll listeners need no changes.
+  useLenis();
+
   // Bio/contact/education/skills/resume/stats all come from one Firestore
   // doc (about/main) via useAboutMe — no local static fallback (content is
   // fully managed by an external admin panel now; see
